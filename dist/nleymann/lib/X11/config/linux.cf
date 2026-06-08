@@ -1,0 +1,79 @@
+XCOMM platform:  $XConsortium: linux.cf,v 1.4 94/04/07 15:46:42 rws Exp $
+
+#define OSName			Linux
+#define OSVendor		/**/
+#define OSMajorVersion		1
+#define OSMinorVersion		0
+#define OSMinorVersion		0
+#define OSTeenyVersion		0
+#define OSDefines		-Dlinux -D__i386__ -D_POSIX_SOURCE \
+				-D_BSD_SOURCE -D_GNU_SOURCE
+
+#define HasGcc			YES
+#define HasGcc2			YES
+#define HasCplusplus		YES
+#define HasGcc2ForCplusplus	YES
+#define GccUsesGas		YES
+#define UseGas			YES
+#define GnuCpp			YES
+#define HasShadowPasswd		NO
+#ifndef HasLibCrypt
+# define HasLibCrypt		NO
+#endif
+#define HasPutenv		YES
+#define HasShm			YES
+#define HasSockets		YES
+
+#define AvoidNullMakeCommand	YES
+#define StripInstalledPrograms	YES
+#define CompressAllFonts	YES
+#define Malloc0ReturnsNull	YES
+#define NeedConstPrototypes	YES
+#define NeedFunctionPrototypes	YES
+#define NeedNestedPrototypes	YES
+#define NeedVarargsPrototypes	YES
+#define NeedWidePrototypes	NO
+
+#define BuildXKB		YES
+
+#define CcCmd			gcc
+#define CppCmd			/lib/cpp
+#define YaccCmd			bison -y
+#define LexCmd			flex -l
+#define LexLib			-lfl
+#define PreProcessCmd		CcCmd -E
+#define PostIncDir		`gcc --print | sed 's/libgcc.a/include/'`
+#define LdCombineFlags		-r
+#define OptimizedCDebugFlags	-O2 -m486
+#define AsmDefines		-DUSE_GAS
+#define StandardDefines		OSDefines
+#define StandardCppDefines	-traditional StandardDefines
+#define ServerOSDefines		-DDDXTIME
+#define ExtensionOSDefines	-DXTESTEXT1
+#define ServerExtraDefines	-DGCCUSESGAS -DXDMCP
+#define ServerExtraSysLibs	$(CBRT)
+#define ConnectionFlags		-DUNIXCONN -DTCPCONN
+#define InstUidFlags		-s -m 4755
+
+/* Some of these man page defaults are overriden in the above OS sections */
+#ifndef ManSuffix
+# define ManSuffix	1x
+#endif
+#ifndef ManDir
+# define ManDir		$(MANSOURCEPATH)1
+#endif
+#ifndef LibManSuffix
+# define LibManSuffix	3x
+#endif
+#ifndef LibmanDir
+# define LibmanDir	$(MANSOURCEPATH)3
+#endif
+#ifndef FileManSuffix
+# define FileManSuffix	5x
+#endif
+#ifndef FileManDir
+# define FileManDir	$(MANSOURCEPATH)5
+#endif
+
+#include <lnxLib.rules>
+#include <xfree86.cf>

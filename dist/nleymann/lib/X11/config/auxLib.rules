@@ -1,0 +1,113 @@
+/*
+ * A/UX shared library rules
+ */
+
+#ifndef HasSharedLibraries
+#define HasSharedLibraries YES
+#endif
+#ifndef SharedLibPex
+#define SharedLibPex YES
+#endif
+#ifndef ForceNormalLib
+#define ForceNormalLib YES
+#endif
+#ifndef SharedDataSeparation
+#define SharedDataSeparation YES
+#endif
+#ifndef SharedCodeDef
+#define SharedCodeDef -DSHAREDCODE
+#endif
+#ifndef SharedLibraryDef
+#define SharedLibraryDef -DAUXSHLIB
+#endif
+#ifndef ShLibIncludeFile
+#define ShLibIncludeFile <auxLib.tmpl>
+#endif
+
+/*
+ * NormalSharedLibObjCompile - compile fragment for shared object when
+ * a normal library is not being built
+ */
+#ifndef NormalSharedLibObjCompile
+#define NormalSharedLibObjCompile(options) $(RM) $@			@@\
+	$(MV) $*.c $*.c.save						@@\
+	echo \#include \"auxshlib.h\" | cat - $*.c.save >$*.c		@@\
+	(set +e; \							@@\
+	$(CC) -c $(CFLAGS) options $(SHLIBDEF) $(SHAREDCODEDEF) $*.c; \	@@\
+	STATUS=$$?; $(MV) $*.c.save $*.c; exit $$STATUS)
+#endif
+
+/*
+ * SharedLibObjCompile - compile fragment for shared objects
+ */
+#ifndef SharedLibObjCompile
+#define SharedLibObjCompile(options) $(RM) $@ shared/$@			@@\
+	$(MV) $*.c $*.c.save						@@\
+	echo \#include \"auxshlib.h\" | cat - $*.c.save >$*.c		@@\
+	(set +e; \							@@\
+	$(CC) -c $(CFLAGS) options $(SHLIBDEF) $(SHAREDCODEDEF) $*.c; \	@@\
+	STATUS=$$?; $(MV) $*.c.save $*.c; exit $$STATUS)		@@\
+	$(MV) $@ shared/$@
+#endif
+
+/*
+ * InstallSharedLibrary - generate rules to install the shared library.
+ * NOTE: file must be executable, hence "INSTBINFLAGS"
+ */
+#ifndef InstallSharedLibrary
+#define	InstallSharedLibrary(libname,rev,dest)				@@\
+install:: Concat3(lib,libname.rev,_s)					@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	$(INSTALL) -c $(INSTBINFLAGS) Concat3(lib,libname.rev,_s) $(DESTDIR)/shlib @@\
+	$(INSTALL) -c $(INSTLIBFLAGS) Concat3(lib,libname,_s.a) $(DESTDIR)dest
+
+#endif /* InstallSharedLibrary */
+
+/*
+ * InstallSharedLibraryData - generate rules to install the shared library data
+ */
+#ifndef InstallSharedLibraryData
+#define	InstallSharedLibraryData(libname,rev,dest)			@@\
+install:: Concat3(lib,libname,_s.a)
+
+#endif /* InstallSharedLibraryData */
+
+/*
+ * SharedLibraryTarget - generate rules to create a shared library
+ */
+#ifndef SharedLibraryTarget
+#define SharedLibraryTarget(libname,rev,solist,down,up)			@@\
+AllTarget(Concat3(lib,libname.rev,_s))					@@\
+									@@\
+down/auxshlib.o: auxshlib.c						@@\
+	$(RM) down/auxshlib.o						@@\
+	$(CC) -o down/auxshlib.o -c $(CFLAGS) auxshlib.c		@@\
+									@@\
+Concat3(lib,libname.rev,_s): solist down/auxshlib.o auxshlib.spec	@@\
+	$(RM) $@ Concat3(lib,libname,_s.a)				@@\
+	@if [ -f auxmemcpy.s ]; then set -x; \				@@\
+		$(AS) -o down/auxmemcpy.o auxmemcpy.s; fi		@@\
+	sed -e s/LIBREV/rev/ <auxshlib.spec >tmp.spec			@@\
+	(cd down; \							@@\
+	mkshlib -s up/tmp.spec -t up/$@ -h up/Concat3(lib,libname,_s.a); \ @@\
+	sleep 1; touch up/$@) /* to outdate libname_s.a */		@@\
+	$(RM) tmp.spec							@@\
+									@@\
+clean::									@@\
+	$(RM) Concat3(lib,libname.rev,_s) tmp.spec
+
+#endif /* SharedLibraryTarget */
+
+/*
+ * SharedLibraryDataTarget - generate rules to create shlib data file
+ */
+#ifndef SharedLibraryDataTarget
+#define SharedLibraryDataTarget(libname,rev,salist)			@@\
+AllTarget(Concat3(lib,libname,_s.a))					@@\
+									@@\
+Concat3(lib,libname,_s.a): Concat3(lib,libname.rev,_s) salist		@@\
+	ar rs $@ salist							@@\
+									@@\
+clean::									@@\
+	$(RM) Concat3(lib,libname,_s.a)
+#endif /* SharedLibraryDataTarget */

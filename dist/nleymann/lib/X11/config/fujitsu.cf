@@ -1,0 +1,45 @@
+XCOMM platform:  $XConsortium: fujitsu.cf,v 1.3 94/07/05 11:10:18 kaleb Exp $
+
+#ifdef SparcArchitecture
+
+#define OSName             FUJITSU UXP/DS V10L20
+XCOMM operating system:    OSName
+#define OSMajorVersion     10
+#define OSMinorVersion     20
+
+#define BootstrapCFlags    -D__uxp__
+#define StandardDefines    -D__uxp__ -DSVR4 -DANSICPP
+#define StandardCppDefines -D__uxp__ -DSVR4 -DANSICPP
+
+#define CppCmd             /usr/ccs/lib/cpp
+
+#define SystemV4	   YES
+#define HasSockets         YES
+#define BuildServer        NO
+
+#include <sv4Lib.rules>
+
+#endif
+
+#ifdef mc68000Architecture
+#define OSName             FUJITSU SX/G E17
+XCOMM operating system:    OSName
+#define OSMajorVersion     17
+#define OSMinorVersion     10
+
+#define BootstrapCFlags    -D__sxg__
+#define StandardDefines    -D__sxg__ -DSYSV -DUSG -DNOSTDHDRS -I/usr/xwin/include
+#define StandardCppDefines -D__sxg__ -DSYSV -DUSG -DNOSTDHDRS -I/usr/xwin/include
+
+#define LnCmd              ln
+
+#define DoRanlibCmd        NO 
+#define DefaultCCOptions   +Z384
+#define ExtraLibraries     -lXbsd -lsocket -lu
+#define TermcapLibrary     -lcurses
+#define BuildServer        NO
+#define HasSymLinks        NO
+#define HasVFork           NO
+#define XawI18nDefines     -DUSE_X_WCHAR_STRING -DUSE_XMBTOWC
+
+#endif

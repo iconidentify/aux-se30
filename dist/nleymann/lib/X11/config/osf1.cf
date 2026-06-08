@@ -1,0 +1,74 @@
+XCOMM platform:  $XConsortium: osf1.cf,v 1.38 94/06/03 21:38:48 matt Exp $
+/* only tested with Digital OSF/1 */
+
+#ifdef AlphaArchitecture
+#define OSName			OSF/1 1.3
+XCOMM operating system:  OSName
+#define OSMajorVersion		1
+#define OSMinorVersion		3
+#else
+#define OSName			OSF/1 1.0
+XCOMM operating system:  OSName
+#define OSMajorVersion		1
+#define OSMinorVersion		0
+#endif
+
+#define HasPutenv		YES
+#define Malloc0ReturnsNull	YES
+#define HasNdbm			YES
+#define HasShm			YES
+#define AvoidNullMakeCommand	YES
+#define HasPosixThreads		YES
+#define SystemMTDefines -D_REENTRANT
+#define HasPoll			YES
+#define HasVFork                NO
+#define InstallCmd installbsd
+#if OSMinorVersion > 0
+#define ModernOSF1		YES
+#else
+#define ModernOSF1		NO
+#define ShLibDir /usr/shlib
+#define SharedLibPex		NO  /* losing, no shared -lm */
+#endif
+#define ThreadedX		ModernOSF1
+
+#if ThreadedX
+#define ThreadsLibraries -lpthreads -lmach -lc_r
+#endif
+
+/*
+ * For OSF/1 platforms, we must define both the location of the compiler
+ * and the location of its standard C++ library.  The library location
+ * is needed to resolve dependent library symbols when we build our own
+ * C++ shared libraries like libFresco
+ */
+
+#ifndef CplusplusCmd
+#define CplusplusCmd /usr/bin/cxx
+#endif
+#ifndef CplusplusDependIncludes 
+#define CplusplusDependIncludes -D__DECCXX -I/usr/include
+#endif
+#ifndef CplusplusLibC
+#define CplusplusLibC -L/usr/lib/cmplrs/cxx -lcxx
+#endif
+
+#include <osfLib.rules>
+#define NoRConst		YES
+
+#ifdef AlphaArchitecture
+#define HasWChar32		YES
+#define DefaultCCOptions	-std1
+#define XawI18nDefines		-DHAS_WCHAR_H
+#define BuildServer		NO
+#endif
+#ifdef MipsArchitecture
+#define DefaultCCOptions	-Xc
+#define XdecServer YES
+#define ServerOSDefines -DDDXTIME
+#define PexCCOptions -Xc -Wf,-XNp15000,-XNd15000
+#define NormalLibObjCompile(options) $(RM) $@ $*.os \			@@\
+	&& $(CC) -c options $(CFLAGS) $*.c \				@@\
+	&& $(LD) $(LDSTRIPFLAGS) -r $@ -o $*.os \			@@\
+	&& $(MV) $*.os $@
+#endif

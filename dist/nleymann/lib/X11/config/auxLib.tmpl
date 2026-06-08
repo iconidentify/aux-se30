@@ -1,0 +1,61 @@
+/*
+ * A/UX shared library template
+ */
+
+#ifndef SharedXlibRev
+#define SharedXlibRev 6.0
+#endif
+#ifndef SharedOldXRev
+#define SharedOldXRev 6.0
+#endif
+#ifndef SharedXtRev
+#define SharedXtRev 6.0
+#endif
+#ifndef SharedXawRev
+#define SharedXawRev 6.0
+#endif
+#ifndef SharedXmuRev
+#define SharedXmuRev 6.0
+#endif
+#ifndef SharedXextRev
+#define SharedXextRev 6.0
+#endif
+#ifndef SharedXinputRev
+#define SharedXinputRev 6.0
+#endif
+#ifndef SharedPEX5Rev
+#define SharedPEX5Rev 5.1
+#endif
+
+#if SharedLibXext
+  DEPEXTENSIONLIB = _UseCat($(USRLIBDIR),$(EXTENSIONSRC)/lib,/libXext_s.a)
+     EXTENSIONLIB = _Use(-lXext_s,$(EXTENSIONSRC)/lib/libXext_s.a)
+#endif
+#if SharedLibX
+          DEPXLIB = $(DEPEXTENSIONLIB) _UseCat($(USRLIBDIR),$(XLIBSRC),/libX11_s.a)
+             XLIB = $(EXTENSIONLIB) _Use(-lX11_s,$(XLIBSRC)/libX11_s.a)
+#endif
+#if SharedLibXmu
+        DEPXMULIB = _UseCat($(USRLIBDIR),$(XMUSRC),/libXmu_s.a)
+           XMULIB = _Use(-lXmu_s,$(XMUSRC)/libXmu_s.a)
+#endif
+#if SharedOldLibX
+       DEPOLDXLIB = _UseCat($(USRLIBDIR),$(OLDXLIBSRC),/liboldX_s.a)
+          OLDXLIB = _Use(-loldX_s,$(OLDXLIBSRC)/liboldX_s.a)
+#endif
+#if SharedLibXt
+      DEPXTOOLLIB = _UseCat($(USRLIBDIR),$(TOOLKITSRC),/libXt_s.a)
+         XTOOLLIB = _Use(-lXt_s,$(TOOLKITSRC)/libXt_s.a)
+#endif
+#if SharedLibXaw
+        DEPXAWLIB = _UseCat($(USRLIBDIR),$(AWIDGETSRC),/libXaw_s.a)
+           XAWLIB = _Use(-lXaw_s,$(AWIDGETSRC)/libXaw_s.a)
+#endif
+#if SharedLibXinput
+        DEPXILIB = _UseCat($(USRLIBDIR),$(XILIBSRC),/libXi_s.a)
+           XILIB = _Use(-lXi_s,$(XILIBSRC)/libXi_s.a)
+#endif
+#if SharedLibPEX5
+        DEPXILIB = _UseCat($(USRLIBDIR),$(XILIBSRC),/libPEX5_s.a)
+           XILIB = _Use(-lXi_s,$(XILIBSRC)/libPEX5_s.a)
+#endif

@@ -1,0 +1,126 @@
+#!/bin/sh
+# auxadmin - A/UX host settings manager, driven remotely via auxagent.
+#
+# Model
+# -----
+# A SETTING is a named piece of host configuration with get/set semantics.
+# Whatever the underlying mechanism (a Mac pref file, /etc/inittab, a text
+# config), it is exposed here as one uniform name you can read and write:
+#
+#     auxadmin list                  # every setting: name = value (description)
+#     auxadmin get  <name>           # print one setting's current value
+#     auxadmin set  <name> <value>   # change a setting
+#     auxadmin describe <name>       # description + allowed values
+#
+# Adding a capability = three small things, nothing else changes:
+#   1. a get_<name>() function (required)
+#   2. a set_<name>() function (optional; omit for read-only settings)
+#   3. one line in registry() : name|allowed values|one-line description
+#
+# This runs on A/UX, so it is plain Bourne shell (no bashisms): functions,
+# case, test, backticks only. Driven from the Mac with `auxctl admin ...`.
+
+PREFS="/mac/sys/Login System Folder/Preferences"
+AUXPREFS="/.aux_prefs"
+
+# --- registry ---------------------------------------------------------------
+# Fields are pipe-delimited; keep literal pipes OUT of the value/desc text
+# (list allowed values with commas).
+registry() {
+cat <<'REG'
+autologin|off, <username>|Auto-login user at boot, or off (then the login window appears)
+session|mac32, console, x11|Default login session type (the login window picker also sets this)
+REG
+}
+
+# --- autologin --------------------------------------------------------------
+# Backed by the Login pref file "<prefs>/Autologin" containing the username.
+# Disabling renames it to Autologin.off (reversible), which is what makes the
+# real A/UX login window appear instead of booting straight into a session.
+get_autologin() {
+    if [ -f "$PREFS/Autologin" ]; then
+        cat "$PREFS/Autologin"
+    else
+        echo off
+    fi
+}
+set_autologin() {
+    v="$1"
+    if [ -z "$v" ]; then
+        echo "usage: auxadmin set autologin {off|<username>}" >&2
+        return 2
+    fi
+    if [ "$v" = off ]; then
+        if [ -f "$PREFS/Autologin" ]; then
+            mv "$PREFS/Autologin" "$PREFS/Autologin.off"
+        fi
+        echo "autologin -> off (the login window appears at next logout/boot)"
+    else
+        echo "$v" > "$PREFS/Autologin"
+        rm -f "$PREFS/Autologin.off"
+        echo "autologin -> $v (auto-logs in as '$v' at next boot)"
+    fi
+}
+
+# --- session ----------------------------------------------------------------
+# Backed by /.aux_prefs line "session type:<value>". The graphical login
+# picker is the authoritative way to choose a session; this reads/writes the
+# stored default. Verify at the login window after changing it.
+get_session() {
+    if [ -f "$AUXPREFS" ]; then
+        sed -n 's/^session type:\(.*\)/\1/p' "$AUXPREFS"
+    else
+        echo "(unset)"
+    fi
+}
+set_session() {
+    if [ -z "$1" ]; then
+        echo "usage: auxadmin set session <type>   (e.g. mac32, console, x11)" >&2
+        return 2
+    fi
+    echo "session type:$1" > "$AUXPREFS"
+    echo "session -> $1 (confirm/override at the login window picker)"
+}
+
+# --- dispatch ---------------------------------------------------------------
+# NOTE: A/UX's Bourne shell does NOT restore the caller's positional params
+# after a function call (calling `known "$2"` leaves $2 empty). So capture
+# arguments into named variables BEFORE calling any function.
+known() { registry | awk -F'|' -v n="$1" '$1==n{f=1} END{exit !f}'; }
+
+cmd="$1"; name="$2"; val="$3"
+case "$cmd" in
+  list|"")
+    registry | while IFS='|' read rname rallowed rdesc; do
+        rval=`get_$rname 2>/dev/null`
+        echo "$rname = $rval    ($rdesc)"
+    done
+    ;;
+  get)
+    known "$name" || { echo "auxadmin: unknown setting '$name'" >&2; exit 2; }
+    get_"$name"
+    ;;
+  set)
+    known "$name" || { echo "auxadmin: unknown setting '$name'" >&2; exit 2; }
+    set_"$name" "$val"
+    ;;
+  describe)
+    known "$name" || { echo "auxadmin: unknown setting '$name'" >&2; exit 2; }
+    registry | awk -F'|' -v n="$name" '$1==n{
+        print "setting: " $1; print "allowed: " $2; print "purpose: " $3 }'
+    ;;
+  help|-h|--help)
+    echo "auxadmin - A/UX host settings manager"
+    echo "  auxadmin list"
+    echo "  auxadmin get  <name>"
+    echo "  auxadmin set  <name> <value>"
+    echo "  auxadmin describe <name>"
+    echo ""
+    echo "settings:"
+    registry | while IFS='|' read name allowed desc; do echo "  $name"; done
+    ;;
+  *)
+    echo "auxadmin: unknown command '$cmd' (try: auxadmin help)" >&2
+    exit 2
+    ;;
+esac

@@ -1,0 +1,146 @@
+XCOMM site:  $XConsortium: site.sample,v 1.9 94/04/08 17:02:06 rws Exp $
+
+/*****************************************************************************
+ *                                                                           *
+ *			   SITE-SPECIFIC DEFINITIONS                         *
+ *                                                                           *
+ * This file contains two halves, one included before the vendor-specific    *
+ * configuration file (.cf file), and one included after the .cf file.       *
+ * The before-half should be protected by #ifdef BeforeVendorCF, and the     *
+ * after-half should be protected by #ifdef AfterVendorCF.                   *
+ *                                                                           *
+ * The before-half should only set things that the .cf file depends on.      *
+ * For the .cf files shipped in this release, the main variables in this     *
+ * category are HasGcc and HasGcc2.                                          *
+ *                                                                           *
+ * The after-half should contain all other definitions.  For example,        *
+ * place your ProjectRoot definition here.                                   *
+ *                                                                           *
+ * OS Major and Minor version numbers should be changed directly in the .cf  *
+ * file, not overridden in site.def.                                         *
+ *                                                                           *
+ *****************************************************************************/
+
+/* if you want host-specific customization, this is one way to do it */
+/*
+#ifndef SiteIConfigFiles
+#define SiteIConfigFiles $(IRULESRC)/host.def
+#define LocalConfigFiles host.def
+#endif
+
+*/
+
+
+#ifdef BeforeVendorCF
+#define HasGcc YES
+
+/*
+#include <host.def>
+*/
+
+#ifndef HasGcc
+#define HasGcc YES
+#endif
+
+#ifndef HasGcc2
+#define HasGcc2 YES
+#endif
+
+
+#endif /* BeforeVendorCF */
+
+#ifdef AfterVendorCF
+
+#undef RemoveTargetProgramByMoving
+#define RemoveTargetProgramByMoving NO
+#define InstallCmd             ginstall
+#define InstKmemFlags          -g sys -m 2755
+#define StripInstalledPrograms YES
+#define InstallXinitConfig     YES
+#define InstallXdmConfig       YES
+#define InstallFSConfig        YES
+#define BuildPex               NO
+#define CompressAllFonts       YES
+
+
+#define DefaultFontPath $(FONTDIR)/misc/,$(FONTDIR)/Speedo/,$(FONTDIR)/Type1/,$(FONTDIR)/75dpi/,$(FONTDIR)/100dpi/
+
+#define DefaultUserPath :/usr/local/bin:$(BINDIR):/bin:/usr/bin:/usr/ucb:/mac/bin:/usr/local/etc:/etc:/usr/etc
+
+#define DefaultSystemPath /usr/local/bin:$(BINDIR):/bin:/usr/bin:/usr/ucb:/mac/bin:/usr/local/etc:/etc:/usr/etc:.
+
+#define XmanSearchPath /usr/catman/u_man:/usr/catman/a_man:/usr/catman/l_man:/usr/catman/x_man
+
+
+#define ProjectRoot /usr/local/X11R6
+
+#define HasXdmAuth YES
+
+#define BuildXKB YES
+
+/*#define PreIncDir /usr/local/Gnu/lib/gcc/aux/2.5.7/include*/
+
+/*
+#if defined(SunArchitecture) && defined(SparcArchitecture)
+#define HasCodeCenter	YES
+#ifndef SVR4
+#define HasTestCenter	YES
+#endif
+#endif
+*/
+
+/*
+#ifdef __hp9000s800
+#define HasCodeCenter	YES
+#endif
+*/
+
+/*
+#if defined(SunArchitecture) && defined(SparcArchitecture) && !defined(SVR4)
+#define HasPurify	YES
+#endif
+*/
+
+/*
+#define HasSentinel	YES
+*/
+
+/*
+#if XsvgaServer
+#define SvgaConfig vga.pmi:1024x768
+#endif
+*/
+
+/* You do NOT need SetUID if you only run the server under xdm */
+/* You MAY need SetUID if users run the server by hand or under xinit */
+/* Consult your system administrator before making the X server setuid */
+/*
+#if defined(SunArchitecture) && OSMajorVersion > 4
+#define InstallXserverSetUID YES
+#endif
+*/
+
+/* You do NOT need SetUID if you only run the server under xdm */
+/* You MAY need SetUID if users run the server by hand or under xinit */
+/* Consult your system administrator before making the X server setuid */
+/*
+#if XsvgaServer
+#define SvgaConfig vga.pmi:1024x768
+#define InstallXserverSetUID YES
+#endif
+*/
+
+/* You do NOT need SetUID if you only run the server under xdm */
+/* You MAY need SetUID if users run the server by hand or under xinit */
+/* Consult your system administrator before making the X server setuid */
+/*
+#ifdef XFree86Version
+#define InstallXserverSetUID YES
+#endif
+*/
+
+/*
+#include <host.def>
+*/
+
+#endif /* AfterVendorCF */

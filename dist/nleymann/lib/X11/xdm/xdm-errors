@@ -1,0 +1,10 @@
+
+Fatal server error:
+ioctl I_STR VIDEO_MAP_SLOT failed
+xdm error (pid 748): IO Error in XOpenDisplay
+xdm error (pid 744): Display :0 cannot be opened
+
+Fatal server error:
+ioctl I_STR VIDEO_MAP_SLOT failed
+xdm error (pid 744): server unexpectedly died
+xdm error (pid 744): Server for display :0 can't be started, session disabled

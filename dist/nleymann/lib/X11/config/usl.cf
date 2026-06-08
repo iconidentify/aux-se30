@@ -1,0 +1,14 @@
+XCOMM platform:  $XConsortium: usl.cf,v 1.30 94/03/29 15:42:18 gildea Exp $
+
+#define OSName			UNIX System V/386 Release 4.2 Version 1
+XCOMM operating system:  OSName
+#define OSMajorVersion		4
+#define OSMinorVersion		2
+#define OSTeenyVersion		1
+
+#define BootstrapCFlags		-DUSL
+#define NeedWidePrototypes	NO	/* experimental */
+#define ServerExtraDefines	-D__USLC__
+#define ServerOSDefines		-DDDXTIME -DDDXOSINIT
+#define i386Architecture
+#include <svr4.cf>

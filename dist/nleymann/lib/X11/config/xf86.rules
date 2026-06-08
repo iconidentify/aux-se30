@@ -1,0 +1,90 @@
+XCOMM $XConsortium: xf86.rules,v 1.1 94/03/29 15:34:48 gildea Exp $
+
+/*
+ * These rules are needed to build the Xfree86 X Servers
+ */
+
+#ifndef AssembleObject
+#define AssembleObject(flags) $(RM) $@                                  @@\
+	$(CPP) AsmDefines $(INCLUDES) flags $*.s | grep -v '^\#' > $*.i @@\
+	$(AS) -o $*.o $*.i                                              @@\
+	$(RM) $*.i
+#endif
+
+#define NormalAsmObjectRule()                                           @@\
+.s.o:                                                                   @@\
+	AssembleObject($(_NOOP_))
+
+#define ObjectFromSpecialAsmSource(dst,src,flags)                       @@\
+dst.s:  src.s                                                           @@\
+	$(RM) $@                                                        @@\
+	$(LN) $? $@                                                     @@\
+                                                                        @@\
+dst.o:  dst.s                                                           @@\
+	AssembleObject(flags)                                           @@\
+                                                                        @@\
+depend:: dst.s                                                          @@\
+                                                                        @@\
+clean::                                                                 @@\
+	$(RM) dst.s
+
+
+/*
+ * Rules for building config files from scripts
+ */
+
+#ifndef Depend
+# define Depend depend
+#endif
+ 
+#define ConfigTargetLong(target,dep,script,args,extra)                  @@\
+all:: Configure                                                         @@\
+                                                                        @@\
+Configure:: target.o                                                    @@\
+                                                                        @@\
+target.c: script dep                                                    @@\
+	$(MAKE) $(MFLAGS) Makefile                                      @@\
+	$(MAKE) $(MFLAGS) extra Concat(Build,target)                    @@\
+                                                                        @@\
+Concat(Build,target):                                                   @@\
+	$(RM) target.c                                                  @@\
+	$(SHELL) script args                                            @@\
+                                                                        @@\
+clean::                                                                 @@\
+	$(RM) target.c
+
+#define ConfigTarget(target,dep,script,args) ConfigTargetLong(target,dep,script,args,Depend)
+
+#define ConfigTargetNoDepend(target,dep,script,args) ConfigTargetLong(target,dep,script,args,)
+
+/*
+ * Rules for installing LinkKit parts (target is install.linkkit)
+ */
+
+#define InstallLinkKitNonExecFile(file,dest)				@@\
+install.linkkit:: file							@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	$(INSTALL) -c $(INSTDATFLAGS) file $(DESTDIR)dest
+
+#define InstallLinkKitLibrary(libname,dest)				@@\
+install.linkkit:: Concat(lib,libname.a)					@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	$(INSTALL) -c $(INSTLIBFLAGS) Concat(lib,libname.a) $(DESTDIR)dest @@\
+	RanLibrary($(RANLIBINSTFLAGS) Concat($(DESTDIR)dest/lib,libname.a))
+
+#define InstallLinkKitNamedNonExec(srcname,dstname,dest)		@@\
+install.linkkit:: srcname						@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	$(INSTALL) -c $(INSTDATFLAGS) srcname $(DESTDIR)dest/dstname
+
+#define InstallLinkKitNamedProg(srcname,dstname,dest)			@@\
+install.linkkit:: srcname						@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	$(INSTALL) -c $(INSTBINFLAGS) srcname $(DESTDIR)dest/dstname
+
+#define InstallLinkKitSubdirs(dirs) \
+NamedTargetSubdirs(install.linkkit,dirs,"installing link kit",DESTDIR='$(DESTDIR)',install.linkkit)
+
+#ifndef LinkKitDir
+# define LinkKitDir		$(USRLIBDIR)/Server
+#endif

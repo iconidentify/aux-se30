@@ -1,0 +1,86 @@
+#!/bin/sh
+# auxctl - client for the A/UX Agent Protocol (AAP). Talks to an auxagent
+# running on an A/UX host. Uses curl (transport) + python3 (CRC verify).
+#
+# Usage:
+#   auxctl ping  HOST:PORT
+#   auxctl exec  HOST:PORT "shell command"        # prints output; exit = remote exit
+#   auxctl get   HOST:PORT REMOTE_PATH LOCAL_FILE  # download (CRC-verified)
+#   auxctl put   HOST:PORT LOCAL_FILE REMOTE_PATH  # upload   (CRC-verified)
+#
+# Env:
+#   AAP_TOKEN   if set, sent as X-Aap-Token (must match the agent's token)
+#
+# Examples:
+#   auxctl ping 10.1.1.20:8377
+#   auxctl exec 10.1.1.20:8377 "uname -a; ls /usr/local"
+#   auxctl get  10.1.1.20:8377 /usr/local/xcb/xc/lib/X11/libX11.6.0_s ./libX11.6.0_s
+#   auxctl put  10.1.1.20:8377 ./buildlib.sh /usr/local/buildlib.sh
+
+set -e
+
+CURL="curl -s --fail-with-body"
+[ -n "$AAP_TOKEN" ] && CURL="$CURL -H X-Aap-Token:$AAP_TOKEN"
+
+crc32() { python3 - "$1" <<'PY'
+import sys, zlib
+with open(sys.argv[1],'rb') as f:
+    print('%08x' % (zlib.crc32(f.read()) & 0xffffffff))
+PY
+}
+
+hdrval() { # hdrval <headerfile> <Name>
+    awk -v k="$2" 'BEGIN{IGNORECASE=1} tolower($1)==tolower(k)":"{print $2}' "$1" \
+        | tr -d '\r' | tail -1
+}
+
+cmd="$1"; hp="$2"
+case "$cmd" in
+  ping)
+    $CURL "http://$hp/ping"
+    ;;
+  exec)
+    shift 2
+    hf=$(mktemp)
+    $CURL -X POST --data-binary "$*" -D "$hf" "http://$hp/exec" || true
+    ec=$(hdrval "$hf" X-Exit-Code); rm -f "$hf"
+    exit "${ec:-0}"
+    ;;
+  admin)
+    # auxctl admin HOST:PORT <auxadmin args>
+    #   auxctl admin 10.1.1.20:8377 list
+    #   auxctl admin 10.1.1.20:8377 get autologin
+    #   auxctl admin 10.1.1.20:8377 set autologin off
+    shift 2
+    hf=$(mktemp)
+    $CURL -X POST --data-binary "/usr/local/auxadmin $*" -D "$hf" "http://$hp/exec" || true
+    ec=$(hdrval "$hf" X-Exit-Code); rm -f "$hf"
+    exit "${ec:-0}"
+    ;;
+  get)
+    rp="$3"; lf="$4"
+    hf=$(mktemp)
+    $CURL -D "$hf" "http://$hp/file$rp" -o "$lf"
+    want=$(hdrval "$hf" X-Aap-Sum); rm -f "$hf"
+    got=$(crc32 "$lf")
+    if [ -n "$want" ] && [ "$want" != "$got" ]; then
+        echo "auxctl: CRC MISMATCH for $lf (want $want got $got)" >&2; exit 1
+    fi
+    echo "$lf  ($(wc -c < "$lf" | tr -d ' ') bytes, crc $got OK)"
+    ;;
+  put)
+    lf="$3"; rp="$4"
+    hf=$(mktemp)
+    $CURL -X PUT --data-binary @"$lf" -D "$hf" "http://$hp/file$rp"
+    ec=$(hdrval "$hf" X-Exit-Code); want=$(hdrval "$hf" X-Aap-Sum); rm -f "$hf"
+    got=$(crc32 "$lf")
+    if [ "${ec:-1}" != "0" ]; then echo "auxctl: remote write failed" >&2; exit 1; fi
+    if [ -n "$want" ] && [ "$want" != "$got" ]; then
+        echo "auxctl: CRC MISMATCH on upload (want $want got $got)" >&2; exit 1
+    fi
+    echo "$rp  (uploaded $(wc -c < "$lf" | tr -d ' ') bytes, crc $got OK)"
+    ;;
+  *)
+    echo "usage: auxctl {ping|exec|get|put|admin} HOST:PORT ..." >&2; exit 2
+    ;;
+esac

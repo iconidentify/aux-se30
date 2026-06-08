@@ -1,0 +1,88 @@
+XCOMM platform:  $XConsortium: macII.cf,v 1.47 94/07/05 11:09:07 kaleb Exp $
+
+#define OSName            A/UX 3.0
+#define OSMajorVersion    3
+#define OSMinorVersion    0
+#define OSTeenyVersion    0
+XCOMM operating system:  OSName
+
+#if HasGcc
+#define BootstrapCFlags   -DmacII
+#endif
+#define SystemV             YES
+#define HasPoll		    NO
+#define NeedBerklib         YES
+#define ExtraLibraries      $(XBSDLIB) -lposix -lm -lmr
+#define Malloc0ReturnsNull  YES
+#define StandardDefines     -DmacII -DSYSV
+#define ExecableScripts     NO
+#define RemoveTargetProgramByMoving YES
+#define ExpandManNames      YES
+#define PexShmIPC           NO
+#define XmacIIServer        YES
+#define XawI18nDefines      -DUSE_XWCHAR_STRING -DUSE_XMBTOWC
+#if MacHasc89
+#define CcCmd c89 -D_POSIX_SOURCE
+#else
+#define HasVoidSignalReturn HasGcc
+#endif
+#if OSMajorVersion <= 2
+#define ServerExtraDefines  -DSUPPORT_2_0
+#endif
+#define InstKmemFlags	    -g sys -m 2755
+#define ExtensionOSDefines  -DXTESTEXT1
+
+#if !HasGcc
+#define DefaultCCOptions -A 3
+#define PexCCOptions -A 4
+#else
+#define AsCmd gas
+#define CcCmd gcc -pipe -fpcc-struct-return
+#define OptimizedCDebugFlags -O2
+#endif
+
+#include <auxLib.rules>
+
+/*
+ * If you wish to override the man page directories, do so here using just
+ * one tab between the parameter name (e.g. ManDirectoryRoot) and the
+ * value so that cpp doesn't get confused.
+ */
+#define ManDirectoryRoot	/usr/catman/x_man
+#define ManSuffix	1
+
+/*
+ * Man pages need to be formatted when installed, so override the default
+ * imake rules.
+ */
+#define InstallManPageLong(file,destdir,dest)                           @@\
+install.man:: file.man                                                  @@\
+        MakeDir($(DESTDIR)destdir)                                      @@\
+        @(TMP=/tmp/tmp.$$$$; \                                          @@\
+        $(RM) $${TMP}; \                                                @@\
+        echo "  formatting" file.man "..."; \                           @@\
+        tbl file.man | neqn | nroff -man | compress > $${TMP}; \        @@\
+        (set -x; $(INSTALL) -c $(INSTMANFLAGS) $${TMP} \                @@\
+                $(DESTDIR)destdir/dest.$(MANSUFFIX).Z); \               @@\
+        $(RM) $${TMP})
+
+#define InstallManPageAliases(file,destdir,aliases)                     @@\
+install.man::                                                           @@\
+        for i in aliases; do (set -x; \                                 @@\
+        ln $(DESTDIR)destdir/file.$(MANSUFFIX).Z \                      @@\
+                $(DESTDIR)destdir/$$i.$(MANSUFFIX).Z); \                @@\
+        done
+
+#define InstallMultipleMan(list,dest)                                   @@\
+install.man:: list                                                      @@\
+        MakeDir($(DESTDIR)dest)                                         @@\
+        @case '${MFLAGS}' in *[i]*) set +e;; esac; \                    @@\
+        @(TMP=/tmp/tmp.$$$$; \                                          @@\
+        $(RM) $${TMP}; \                                                @@\
+        for i in list; do \                                             @@\
+                echo "  formatting" $$i "..."; \                        @@\
+                tbl $$i | neqn | nroff -man | compress > $${TMP}; \     @@\
+                (set -x; $(INSTALL) -c $(INSTMANFLAGS) $${TMP} \        @@\
+                        dest/$$i.Z); \                                  @@\
+        done; \                                                         @@\
+        $(RM) $${TMP})

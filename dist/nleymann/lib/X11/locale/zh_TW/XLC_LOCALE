@@ -1,0 +1,104 @@
+#  $XConsortium: zh_TW,v 1.3 94/01/22 14:11:36 rws Exp $
+#  XLocale Database Sample for zh_TW
+# 
+
+# 
+# 	XLC_FONTSET category
+# 
+XLC_FONTSET
+# 	fs0 class (7 bit ASCII)
+fs0	{
+	charset		ISO8859-1:GL
+	font		ISO8859-1:GL; CNS11643-0:GL
+}
+# 	fs1 class
+fs1	{
+	charset		CNS11643-1:GL
+	font		CNS11643-1:GL
+}
+# 	fs2 class
+fs2	{
+	charset		CNS11643-2:GL
+	font		CNS11643-2:GL
+}
+# 	fs3 class 
+fs3	{
+	charset		CNS11643-14:GL
+	font		CNS11643-14:GL
+}
+# 	fs4 class 
+fs4	{
+	charset		CNS11643-15:GL
+	font		CNS11643-15:GL
+}
+# 	fs5 class 
+fs5	{
+	charset		CNS11643-16:GL
+	font		CNS11643-16:GL
+}
+END XLC_FONTSET
+
+# 
+# 	XLC_XLOCALE category
+# 
+XLC_XLOCALE
+
+encoding_name		zh_TW.euc
+mb_cur_max		4
+state_depend_encoding	False
+wc_encoding_mask	\x3fffc000
+wc_shift_bits		7
+
+# 	cs0 class
+cs0	{
+	side		GL:Default
+	length		1
+	wc_encoding	\x00000000
+	ct_encoding	ISO8859-1:GL; CNS11643-0:GL
+}
+
+# 	cs1 class
+cs1	{
+	side		GR:Default
+	length		2
+	wc_encoding	\x30000000
+	ct_encoding	CNS11643-1:GR
+}
+
+# 	cs2 class	# plane 2
+cs2	{
+	side		GR
+	length		2
+	mb_encoding	<SS> \x8e\xa2
+	wc_encoding	\x10088000
+	ct_encoding	CNS11643-2:GR
+}
+
+# 	cs3 class	# plane 14
+cs3	{
+	side		GR
+	length		2
+	mb_encoding	<SS> \x8e\xae
+	wc_encoding	\x100b8000
+	ct_encoding	CNS11643-14:GR
+}
+
+# 	cs4 class	# plane 15
+cs4	{
+	side		GR
+	length		2
+	mb_encoding	<SS> \x8e\xaf
+	wc_encoding	\x100bc000
+	ct_encoding	CNS11643-15:GR
+}
+
+# 	cs5 class	# plane 16
+cs5	{
+	side		GR
+	length		2
+	mb_encoding	<SS> \x8e\xb0
+	wc_encoding	\x100c0000
+	ct_encoding	CNS11643-16:GR
+}
+
+END XLC_XLOCALE

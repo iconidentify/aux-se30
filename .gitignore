@@ -1,0 +1,10 @@
+# macOS
+.DS_Store
+**/.DS_Store
+
+# phosphor is its own git repository (github.com/iconidentify/phosphor)
+phosphor/
+
+# unrelated personal files
+self-portrait.svg
+portrait-of-you.svg

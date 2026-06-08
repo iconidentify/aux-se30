@@ -1,0 +1,61 @@
+XCOMM platform:  $XConsortium: FreeBSD.cf,v 1.1 94/03/29 15:34:45 gildea Exp $
+
+#define OSName            FreeBSD 1.1
+#define OSVendor          /**/
+XCOMM operating system:  OSName
+#define OSMajorVersion    1
+#define OSMinorVersion    1
+
+#define HasPutenv       YES
+#define HasBSD44Sockets YES
+
+#define CppCmd          /usr/libexec/cpp -traditional
+#define PreProcessCmd   /usr/libexec/cpp -traditional
+#undef  InstallCmd
+#define InstallCmd /usr/bin/install
+
+#define UseGas		YES
+#ifndef GccUsesGas
+# define GccUsesGas	YES
+#endif
+
+#ifndef AsmDefines
+#  define AsmDefines -DUSE_GAS
+#endif
+
+#if GccUsesGas
+# define GccGasOption -DGCCUSESGAS
+#else
+# define GccGasOption /**/
+#endif
+
+#ifndef HasGcc2
+# define HasGcc2 YES
+#endif
+
+#define CcCmd gcc
+#define DefaultCCOptions /**/
+
+#ifdef __i386__
+#define OptimizedCDebugFlags -m486 -O2
+#define ServerOSDefines	-DDDXTIME
+#else
+#define OptimizedCDebugFlags -O2
+#define ServerOSDefines /**/
+#endif
+#define ServerExtraDefines GccGasOption
+
+#define TroffCmd        groff -Tps
+#define SetTtyGroup     YES
+#define HasNdbm         YES
+#define HasShm          YES
+
+#define HasLibCrypt	YES
+
+#define AvoidNullMakeCommand YES
+
+#include <bsdLib.rules>
+
+#ifdef __i386__
+#include <xfree86.cf>
+#endif

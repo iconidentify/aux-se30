@@ -1,0 +1,13 @@
+! $XConsortium: xdm-conf.cpp,v 1.2 93/09/28 14:30:32 gildea Exp $
+DisplayManager.errorLogFile:	/usr/local/X11R6/lib/X11/xdm/xdm-errors
+DisplayManager.pidFile:		/usr/local/X11R6/lib/X11/xdm/xdm-pid
+DisplayManager.keyFile:		/usr/local/X11R6/lib/X11/xdm/xdm-keys
+DisplayManager.servers:		/usr/local/X11R6/lib/X11/xdm/Xservers
+DisplayManager.accessFile:	/usr/local/X11R6/lib/X11/xdm/Xaccess
+DisplayManager._0.authorize:	true
+DisplayManager._0.setup:	/usr/local/X11R6/lib/X11/xdm/Xsetup_0
+DisplayManager._0.startup:	/usr/local/X11R6/lib/X11/xdm/GiveConsole
+DisplayManager._0.reset:	/usr/local/X11R6/lib/X11/xdm/TakeConsole
+DisplayManager*resources:	/usr/local/X11R6/lib/X11/xdm/Xresources
+DisplayManager*session:		/usr/local/X11R6/lib/X11/xdm/Xsession
+DisplayManager*authComplain:	false

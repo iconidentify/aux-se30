@@ -1,0 +1,190 @@
+XCOMM $XConsortium: xfree86.cf,v 1.2 94/03/31 11:37:26 gildea Exp $
+/*
+ * This configuration file contains all of the configuration
+ * information for the XFree86 based X Servers.
+ *
+ * Most of these settings can be overridden in a vendor.cf or the
+ * BeforeVendor part of the site.def file.
+ */
+
+/*
+ * Default settings for which X Servers to build.
+ */
+#ifndef XF86SVGAServer
+# define XF86SVGAServer		YES
+#endif
+
+#ifndef XF86VGA16Server
+# define XF86VGA16Server	NO
+#endif
+
+#ifndef XF86MonoServer
+# define XF86MonoServer		NO
+#endif
+
+#ifndef XF86HgaServer
+# define XF86HgaServer		NO
+#endif
+
+#ifndef XF86BdmServer
+# define XF86BdmServer		NO
+#endif
+
+#ifndef XF86S3Server
+# define XF86S3Server		NO
+#endif
+
+#ifndef XF86I8514Server
+# define XF86I8514Server	NO
+#endif
+
+#ifndef XF86Mach8Server
+# define XF86Mach8Server	NO
+#endif
+
+#ifndef XF86Mach32Server
+# define XF86Mach32Server	NO
+#endif
+
+#if XF86S3Server
+# define XF86S3Dir		s3
+#else
+# define XF86S3Dir		/**/
+#endif
+
+#if XF86I8514Server
+# define XF86I8514Dir		ibm8514
+#else
+# define XF86I8514Dir		/**/
+#endif
+
+#if XF86Mach8Server
+# define XF86Mach8Dir		mach8
+#else
+# define XF86Mach8Dir		/**/
+#endif
+
+#if XF86Mach32Server
+# define XF86Mach32Dir		mach32
+#else
+# define XF86Mach32Dir		/**/
+#endif
+
+#undef XF86AccelServerDirs
+#define XF86AccelServerDirs   XF86S3Dir XF86I8514Dir XF86Mach8Dir XF86Mach32Dir
+
+#undef XF86AccelServer
+#if XF86S3Server || XF86I8514Server || XF86Mach8Server || XF86Mach32Server
+# define XF86AccelServer	YES
+#else
+# define XF86AccelServer	NO
+#endif
+
+/*
+ * Driver list for several of the X Servers.
+ */
+#ifndef XF86Vga256Drivers
+# define XF86Vga256Drivers	et4000 et3000 pvga1 gvga ati tvga8900 cirrus \
+				ncr77c22 compaq oak
+#endif
+
+#ifndef XF86Vga16Drivers
+# define XF86Vga16Drivers	et4000 ncr77c22 generic tvga8900
+#endif
+
+#ifndef XF86Vga2Drivers
+# define XF86Vga2Drivers	et4000 et3000 pvga1 gvga tvga8900 ncr77c22 \
+				compaq oak generic
+#endif
+
+#ifndef XF86Hga2Drivers
+# define XF86Hga2Drivers	hga6845
+#endif
+
+#ifndef XF86Bdm2Drivers
+# define XF86Bdm2Drivers	hgc1280 sigma
+#endif
+
+#ifndef XF86S3Drivers
+# define XF86S3Drivers		mmio_928 s3_generic
+#endif
+
+/*
+ * By default, build all of the fonts.
+ */
+#ifndef Build75Dpi
+#define Build75Dpi	YES
+#endif
+#ifndef Build100Dpi
+#define Build100Dpi	YES
+#endif
+#ifndef BuildSpeedo
+#define BuildSpeedo	YES
+#endif
+#ifndef BuildType1
+#define BuildType1	YES
+#endif
+
+/*
+ * Some commonly refered to directories are defined here.
+ */
+
+       XF86SRC = $(SERVERSRC)/hw/xfree86
+  XF86ACCELSRC = $(XF86SRC)/accel
+    XF86COMSRC = $(XF86SRC)/common
+     XF86HWSRC = $(XF86SRC)/common_hw
+     XF86OSSRC = $(XF86SRC)/os-support
+  VGADRIVERSRC = $(XF86SRC)/vga256/drivers
+VGA16DRIVERSRC = $(XF86SRC)/vga16/drivers
+ VGA2DRIVERSRC = $(XF86SRC)/vga2/drivers
+ HGA2DRIVERSRC = $(XF86SRC)/hga2/drivers
+ BDM2DRIVERSRC = $(XF86SRC)/bdm2/drivers
+   S3DRIVERSRC = $(XF86SRC)/accel/s3/drivers
+
+/*
+ * These libraries are needed by all X Servers
+ */
+
+XF86INIT   = $(XF86COMSRC)/xf86Init.o
+XF86MINIT  = $(XF86COMSRC)/xf86Init_m.o
+XF86CONFIG = $(XF86COMSRC)/xf86_Option.o
+XF86COMLIB = $(XF86COMSRC)/libxf86.a
+XF86OSLIB  = $(XF86OSSRC)/libxf86_os.a
+XF86HWLIB  = $(XF86HWSRC)/libxf86_hw.a
+XF86LIBS   = $(XF86INIT) $(XF86CONFIG) $(XF86COMLIB) $(XF86HWLIB) $(XF86OSLIB)
+XF86MLIBS  = $(XF86MINIT) $(XF86CONFIG) $(XF86COMLIB) $(XF86HWLIB) $(XF86OSLIB)
+
+/*
+ * Other stuff used in the X Server source.
+ */
+
+#ifndef AsmDefines
+#define AsmDefines /**/
+#endif
+
+#ifndef XFree86Version
+#define XFree86Version	3000
+#endif
+
+#ifndef UseRgbTxt
+#define UseRgbTxt	YES
+#endif
+
+/*
+ * GNU Compiler stuff
+ */
+#ifndef HasGcc
+#define HasGcc HasGcc2
+#endif
+
+#if HasGcc
+#ifndef DefaultCCOptions
+#if defined(SunArchitecture) && defined(i386Architecture)
+#define DefaultCCOptions -DNO_ASM
+#else
+#define DefaultCCOptions -ansi  -DNO_ASM
+#endif
+#endif
+#endif
+
+#include <xf86.rules>
