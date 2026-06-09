@@ -25,6 +25,7 @@ Build order: **Xpm -> Tcl -> Tk -> TclX -> sim**.
   and fold into libtcl.a (`COMPAT_OBJS = compat.o`).
 
 ## Xpm 3.x  (src/xpm)  -> libXpm.a  [DONE]
+- Needs `strdup` at link (A/UX libc lacks it) -> added to compat.c.
 - Use `Makefile.noX` (plain makefile; despite the name it uses real Xlib - the
   stub `simx` is only under `FOR_MSW`).
 - Strip stale deps referencing the renamed header: `grep -v xpmP.h Makefile.noX`.
@@ -53,10 +54,16 @@ Native ld + split libX11 import archive (single-pass, repeat the 3 pieces x4):
 
 (`mm.o` = raw memmove; `compat.o` strtoul/strerror is inside libtcl.a.)
 
+## wish (Tk shell)  [DONE - validates the stack]
+Linked 597KB, loads all shlibs + runs Tk init on A/UX over our X11R6.
+
 ## TclX, sim, 1-bit tiles - TODO
 
 ## Gotchas
 - The 128MB QEMU guest THRASHES/HANGS on the big native-ld links. Build libs
   with -O; do the final links carefully. If the guest hangs (100% CPU, agent
-  unreachable), force-quit + restart QEMU; built .a files survive on disk.
+  unreachable), force-quit + restart QEMU; built .a files survive on disk BUT a crash mid-`ar` can corrupt the
+  archive symbol table (`ld: no string table`); just `rm LIB.a; make LIB.a`
+  to rebuild the index (the .o files are fine). Run big links in the
+  background (`nohup ... &`) + poll so the agent stays reachable if it thrashes.
 - A/UX grep has no `\|` alternation, sed no in-place, sh no `$((...))`; use awk.

@@ -39,3 +39,13 @@ unsigned long strtoul(nptr, endptr, base)
     if (endptr) *endptr = (char *)(any ? s : nptr);
     return neg ? -acc : acc;
 }
+
+char *strdup(s)
+    char *s;
+{
+    char *p;
+    extern char *malloc();
+    p = malloc((unsigned)(strlen(s) + 1));
+    if (p) strcpy(p, s);
+    return p;
+}
