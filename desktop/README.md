@@ -14,7 +14,10 @@ build, tuned for the machine's **1-bit 512x342 monochrome** display and a
   frame draws the logo at its new position first, then clears only the thin
   strip it vacated.
     - `auxsaver [timeout]` - blank after `timeout` idle seconds (default 120)
-    - `auxsaver -test` - bounce immediately, self-exit after ~6s
+    - `auxsaver -test` - bounce immediately (forces the C89 logo), self-exit ~6s
+    - Multi-logo: each time it kicks in it picks a RANDOM logo from those
+      installed (`/usr/local/auxlogo.xbm` Apple/A-UX, `/usr/local/c89logo.xbm`
+      C89 Summer). See `gen/genc89.py` for the PNG->XBM conversion.
 - **`auxfetch`** - a neofetch-style system summary (Apple logo + A/UX info).
   Bourne sh; works with A/UX's toolset (no `printf(1)`, uses awk + paste).
 - **`dot.fvwmrc`** - fvwm 1.24r config: single-button bindings (everything on
