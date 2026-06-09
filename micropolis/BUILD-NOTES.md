@@ -69,7 +69,31 @@ Linked 597KB, loads all shlibs + runs Tk init on A/UX over our X11R6.
 - The sim uses standard Tk (Tk_CreateMainWindow), not TclX's Tk extensions, so
   skip tksrc/tkucbsrc: just `cp ../tk/libtk.a libtk.a; ar ts libtk.a`.
 
-## sim, 1-bit tiles - TODO
+## sim  (src/sim)  -> sim binary  [DONE - builds, links, RUNS]
+- Retarget makefile: our gcc -B, -O3->-O, XINCLUDE=/usr/local/X11R6/include,
+  define XPMHOME=../xpm (it was unset -> broken -I). Keep -DIS_LINUX -DNET.
+- `headers/sim.h`: A/UX has no <sys/mman.h> (and mmap is never called) - guard
+  the include out.
+- `<X11/xpm.h>`: symlink xpm/X11/xpm.h -> ../xpm.h so it resolves under -I../xpm.
+- All 43 .c compile. XShm.h exists in our X11R6 so it compiles; runtime SHM
+  support on XmacII is a later question (sim may need a non-SHM image fallback).
+- FINAL LINK: do it by hand with the split-X11 recipe (the makefile's -lX11
+  -lXext pulls A/UX's stock R4 libs and fails). Link:
+    sim*.o + mm.o + ../tclx/libtk.a ../tclx/libtcl.a ../xpm/libXpm.a
+    -L/tmp/linklib -lXext_s -lX11a_s -lX11b_s -lX11c_s (x4) -lXbsd -lposix -lm -lmr
+  -> sim (895963 bytes). Runs: prints the Micropolis banner, then needs res/.
+
+## Runtime resources (res/)
+The sim is a drop-in replacement for `/usr/SimCity/res/sim`. The res/ assets
+(Tcl/Tk 2.3 UI scripts, sounds, tiles, cities) are NOT in the tenox repo and are
+EA/Maxis-copyrighted (NOT committed here). Get them from the DUX "SimCity for
+Unix" demo: archive.org/details/RareSimcity -> SimCity-2.11-SunOS.tar.gz (the
+res/ is platform-independent; only res/sim is per-platform and we built our own).
+Install to /usr/SimCity (or set SIMHOME), drop our sim in as res/sim.
+
+## 1-bit tiles - TODO
+The DUX tiles are colour; the SE/30 is 1-bit mono. Convert tile art to crisp B&W
+after first seeing how the originals dither.
 
 ## Gotchas
 - The 128MB QEMU guest THRASHES/HANGS on the big native-ld links. Build libs
