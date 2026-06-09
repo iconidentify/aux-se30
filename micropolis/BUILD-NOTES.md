@@ -57,7 +57,19 @@ Native ld + split libX11 import archive (single-pass, repeat the 3 pieces x4):
 ## wish (Tk shell)  [DONE - validates the stack]
 Linked 597KB, loads all shlibs + runs Tk init on A/UX over our X11R6.
 
-## TclX, sim, 1-bit tiles - TODO
+## TclX 6.4c  (src/tclx)  -> extended libtcl.a  [DONE]
+- It ships a `config/aux` (A/UX) target. In `config.mk` set:
+  `TCL_CONFIG_FILE=aux`, `CC=<our gcc -B...>`, `OPTIMIZE_FLAG=-O` (NO -DIS_LINUX
+  on the Tcl side - here IS_LINUX would mean Linux libc, and config/aux already
+  handles A/UX: -DTCL_USE_BZERO_MACRO -DTCL_SIG_PROC_INT, RANLIB_CMD=true).
+- `make TCLX_MAKES` copies ../tcl/libtcl.a then ar's the TclX command objects
+  (src/ ucbsrc/ ossupp/) into it -> extended libtcl.a with the symbol the sim
+  needs: `Tcl_CreateExtendedInterp`. It also links a standalone `tcl` shell.
+- `ar ts libtcl.a` afterwards (RANLIB_CMD=true is a no-op).
+- The sim uses standard Tk (Tk_CreateMainWindow), not TclX's Tk extensions, so
+  skip tksrc/tkucbsrc: just `cp ../tk/libtk.a libtk.a; ar ts libtk.a`.
+
+## sim, 1-bit tiles - TODO
 
 ## Gotchas
 - The 128MB QEMU guest THRASHES/HANGS on the big native-ld links. Build libs
