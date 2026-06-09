@@ -1,0 +1,128 @@
+# .fvwmrc - A/UX SE/30, fvwm 1.24r, 1-bit mono, single-button mouse.
+
+# ---- colours (monochrome) ----
+StdForeColor     Black
+StdBackColor     White
+HiForeColor      White
+HiBackColor      Black
+StickyForeColor  Black
+StickyBackColor  White
+MenuForeColor    Black
+MenuBackColor    White
+MenuStippleColor Black
+
+# ---- fonts ----
+Font       fixed
+WindowFont 6x13bold
+
+# ---- behaviour ----
+DeskTopSize 2x2
+EdgeScroll 0 0
+ClickTime 350
+OpaqueMove 100
+RandomPlacement
+SmartPlacement
+
+# ---- decoration ----
+Style "*"       BorderWidth 5, HandleWidth 5, Color Black/White
+Style "*"       Icon unknown1.xbm
+Style "Fvwm*"   NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0
+Style "*clock"  NoTitle, NoHandles, Sticky, WindowListSkip
+Style "oclock"  NoTitle, NoHandles, Sticky, WindowListSkip
+
+# ---- start with just the desktop (no terminal) ----
+Function "InitFunction"
+  Nop ""
+EndFunction
+Function "RestartFunction"
+  Nop ""
+EndFunction
+
+# ---- helper functions (one button: drag=act, click=other) ----
+Function "Move-or-Raise"
+  Move       "Motion"
+  Raise      "Click"
+  RaiseLower "DoubleClick"
+EndFunction
+Function "Resize-or-Raise"
+  Resize     "Motion"
+  Raise      "Click"
+EndFunction
+Function "Icon-Move-Restore"
+  Move       "Motion"
+  Iconify    "Click"
+EndFunction
+
+# ---- menus ----
+Popup "Main"
+  Title      "A/UX"
+  Exec       "Terminal"      exec xterm -fn 6x10 -fg white -bg black -sb -e /bin/bash -l &
+  Popup      "Appearance"    Appearance
+  Nop        ""
+  Exec       "Clock"         exec oclock &
+  Exec       "Calculator"    exec xcalc &
+  Nop        ""
+  WindowList "Window List"
+  Popup      "Window Ops"    Window-Ops
+  Nop        ""
+  Popup      "Quit / Log out" Quit-Verify
+EndPopup
+
+Popup "Appearance"
+  Title      "Appearance"
+  Popup      "Desktop..."    Desktop-Menu
+  Popup      "New Terminal..." Terminal-Menu
+EndPopup
+
+Popup "Desktop-Menu"
+  Title      "Desktop"
+  Exec       "A/UX on white" exec xsetroot -bitmap /usr/local/auxbrand.xbm -fg black -bg white &
+  Exec       "A/UX on black" exec xsetroot -bitmap /usr/local/auxbrand.xbm -fg white -bg black &
+  Nop        ""
+  Exec       "Solid white"   exec xsetroot -solid white &
+  Exec       "Solid black"   exec xsetroot -solid black &
+  Exec       "Gray weave"    exec xsetroot -gray &
+EndPopup
+
+Popup "Terminal-Menu"
+  Title      "New Terminal"
+  Exec       "White on black" exec xterm -fn 6x10 -fg white -bg black -sb -e /bin/bash -l &
+  Exec       "Black on white" exec xterm -fn 6x10 -fg black -bg white -sb -e /bin/bash -l &
+EndPopup
+
+Popup "Window-Ops"
+  Title      "Window"
+  Move       "Move"
+  Resize     "Resize"
+  Raise      "Raise"
+  Lower      "Lower"
+  Iconify    "Iconify"
+  Stick      "(Un)Stick"
+  Nop        ""
+  Destroy    "Destroy"
+  Delete     "Close"
+EndPopup
+
+Popup "Quit-Verify"
+  Title      "Log out of A/UX?"
+  Nop        "Cancel"
+  Nop        ""
+  Restart    "Restart fvwm" fvwm
+  Quit       "Yes, log out"
+EndPopup
+
+# ---- mouse (single button = Button 1) ----
+Mouse 1 R N Popup "Main"
+Mouse 1 R S WindowList
+Mouse 1 T N Function "Move-or-Raise"
+Mouse 1 T S RaiseLower
+Mouse 1 1 N Popup "Window-Ops"
+Mouse 1 2 N Iconify
+Mouse 1 FS N Function "Resize-or-Raise"
+Mouse 1 W M Function "Move-or-Raise"
+Mouse 1 W C RaiseLower
+Mouse 1 I N Function "Icon-Move-Restore"
+
+# ---- keys ----
+Key F1 A N Popup "Main"
+Key F2 A N WindowList

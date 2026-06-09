@@ -1,0 +1,85 @@
+#!/bin/sh
+# auxfetch - a tiny neofetch-style system summary for A/UX.
+# Bourne sh only (no bashisms); tuned for the SE/30 / A/UX 3.1.1.
+
+# ---- gather info -----------------------------------------------------------
+HOST=`uname -n 2>/dev/null`;      [ -z "$HOST" ] && HOST=aux
+REL=`uname -r 2>/dev/null`;       [ -z "$REL" ] && REL="3.1.1"
+ARCH=`uname -m 2>/dev/null`;      [ -z "$ARCH" ] && ARCH="mc68030"
+USR=`id 2>/dev/null | sed 's/^uid=[0-9]*(\([^)]*\)).*/\1/'`
+[ -z "$USR" ] && USR=root
+SH=`basename "${SHELL:-/bin/sh}"`
+TERMN="${TERM:-xterm}"
+
+# uptime: A/UX has no uptime(1); show boot time from who -b if present
+BOOT=`who -b 2>/dev/null | sed -n 's/.*boot *//p' | sed 's/^ *//'`
+[ -z "$BOOT" ] && BOOT="-"
+
+# window manager: look for a known one in the process list
+WM="none"
+if   /bin/ps -e 2>/dev/null | grep -i fvwm  >/dev/null 2>&1; then WM="fvwm 1.24r"
+elif /bin/ps -e 2>/dev/null | grep -i twm   >/dev/null 2>&1; then WM="twm"
+fi
+
+# display geometry/depth from xdpyinfo if a server is reachable
+DISP="512x342, 1bpp (mono)"
+if [ -n "$DISPLAY" ]; then
+  DD=`xdpyinfo 2>/dev/null | sed -n 's/^  dimensions: *\([0-9x]*\).*/\1/p' | head -1`
+  DP=`xdpyinfo 2>/dev/null | sed -n 's/^  depth of root window: *\([0-9]*\).*/\1/p' | head -1`
+  [ -n "$DD" ] && DISP="$DD, ${DP:-1}bpp"
+fi
+
+# free disk on / (A/UX df: "<blocks> blocks <inodes> i-nodes"), 512-byte blocks
+DFREE=`df / 2>/dev/null | sed -n 's/.* \([0-9][0-9]*\) blocks.*/\1/p' | head -1`
+if [ -n "$DFREE" ]; then
+  DMB=`expr $DFREE / 2048 2>/dev/null`
+  DISK="${DMB} MB free on /"
+else
+  DISK="-"
+fi
+
+# ---- the Apple logo --------------------------------------------------------
+cat > /tmp/auxfetch.logo$$ <<'LOGO'
+                     'c.
+                  ,xNMM.
+                .OMMMMo
+                OMMM0,
+      .;loddo:'  loolloootc.
+    cKMMMMMMMMMMNWMMMMMMMMMM0:
+  .KMMMMMMMMMMMMMMMMMMMMMMMWd.
+  XMMMMMMMMMMMMMMMMMMMMMMMX.
+ ;MMMMMMMMMMMMMMMMMMMMMMMM:
+ :MMMMMMMMMMMMMMMMMMMMMMMM:
+ .MMMMMMMMMMMMMMMMMMMMMMMMX.
+  kMMMMMMMMMMMMMMMMMMMMMMMMWd.
+  'XMMMMMMMMMMMMMMMMMMMMMMMMMMk
+   'XMMMMMMMMMMMMMMMMMMMMMMMMK.
+     kMMMMMMMMMMMMMMMMMMMMMMd
+      ;KMMMMMMMWXXWMMMMMMMk.
+        'cooc'.    .'looo'
+LOGO
+
+# ---- info lines ------------------------------------------------------------
+cat > /tmp/auxfetch.info$$ <<INFO
+$USR@$HOST
+-----------------
+OS:       A/UX $REL (SVR2)
+Host:     Macintosh SE/30
+Kernel:   $REL
+Arch:     $ARCH @ 16 MHz
+Booted:   $BOOT
+Shell:    $SH
+WM:       $WM
+Terminal: $TERMN (X11R6)
+Display:  $DISP
+Disk:     $DISK
+
+[ built from source on A/UX ]
+INFO
+
+# ---- merge side by side (no printf(1) on A/UX; use awk + paste) -------------
+echo ""
+awk '{ printf "  %-32s\n", $0 }' /tmp/auxfetch.logo$$ > /tmp/auxfetch.plogo$$
+paste -d' ' /tmp/auxfetch.plogo$$ /tmp/auxfetch.info$$
+echo ""
+rm -f /tmp/auxfetch.logo$$ /tmp/auxfetch.info$$ /tmp/auxfetch.plogo$$

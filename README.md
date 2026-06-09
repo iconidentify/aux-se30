@@ -23,6 +23,13 @@ side, driven by `curl`/`auxctl` from the Mac. Includes an `auxadmin` settings
 layer for A/UX administration (autologin, session type, ...) and an installer
 that wires the agent into `/etc/inittab` for boot persistence.
 
+### [`desktop/`](desktop/) - the A/UX desktop
+A small period-accurate desktop on top of the X11R6 build: **fvwm 1.24r** tuned
+for the 1-bit mono display and a single-button mouse, a DVD-style bouncing-logo
+**screensaver** (`auxsaver.c`), a neofetch-style `auxfetch`, white-on-black bash
+terminals, and a framed "A/UX" desktop background generated from the real Apple
+logo glyph. fvwm is the session anchor (no fragile console window).
+
 ### `dist/` - build artifacts
 Our compiled R6 shared libraries, import libraries, the split libX11 archive,
 the xterm binaries and objects, the GNU A/UX binutils used for linking, and

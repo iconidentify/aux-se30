@@ -1,0 +1,9 @@
+#!/bin/sh
+SHELL=/bin/bash; export SHELL
+PATH=/bin:/usr/bin:/usr/bin/X11:/usr/ucb:/usr/local/bin:/etc; export PATH
+# X resources (white-on-black xterms, etc.)
+[ -r /.Xdefaults ] && xrdb -merge /.Xdefaults
+# Desktop background: A/UX branding (white on black)
+xsetroot -bitmap /usr/local/auxbrand.xbm -fg black -bg white
+# fvwm is the session leader: closing terminals is safe; "Quit" ends the session.
+exec fvwm
