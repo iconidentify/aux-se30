@@ -100,10 +100,13 @@ setSpeed(short speed)
      MINIMUM, so a slow host (a real SE/30) that can't keep up just runs
      CPU-bound - reasonable on fast and slow machines alike.  Combined with the
      SimSpeed frame-skip in SimFrame (slow 1/5, medium 1/3, fast 1/1). */
+  /* Tuned against measured rate: at delay D the displayed date advances at
+     about 64 * skip * (D + 7ms) seconds per game-month (skip = 5/3/1 for
+     slow/medium/fast).  Targets: slow ~1 month/min, medium ~3/min, fast ~18/min. */
   switch (speed) {
-    case 1: sim_delay =  60000; break; /* slow   (~60ms tick) */
-    case 2: sim_delay =  40000; break; /* medium (~40ms tick) */
-    case 3: sim_delay =  25000; break; /* fast   (~25ms tick) */
+    case 1: sim_delay = 200000; break; /* slow   (~1 game-month / minute) */
+    case 2: sim_delay =  90000; break; /* medium (~3 game-months / minute) */
+    case 3: sim_delay =  45000; break; /* fast   (~18 game-months / minute) */
     default: break;                    /* paused: timer stopped below */
   }
 
