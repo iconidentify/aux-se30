@@ -91,9 +91,39 @@ Unix" demo: archive.org/details/RareSimcity -> SimCity-2.11-SunOS.tar.gz (the
 res/ is platform-independent; only res/sim is per-platform and we built our own).
 Install to /usr/SimCity (or set SIMHOME), drop our sim in as res/sim.
 
+## Startup: the "silent exit" bug (FIXED)
+On the depth-8 QEMU guest the sim would print the banner, log `UIStartSimCity OK`,
+enter `Tk_MainLoop`, and immediately return with `tkMustExit=1` - no window, no
+error. Chased through several red herrings (SIGHUP re-catch, stdin EOF handler)
+before finding the real cause: `GetObjectXpms` in `g_setup.c`.
+
+`GetPixmaps` requests animation-frame counts that the DUX demo asset set does not
+actually ship - e.g. obj1 (traffic) wants 5 frames but only 0-3 exist, and obj8
+(bus) ships none at all. Each missing `objN-M.xpm` made `XpmReadFileToPixmap`
+fail, and the original code called `sim_exit(1)` on any failure. `sim_exit` just
+sets `tkMustExit`/`ExitReturn`, so `UIStartSimCity` still returned "OK" and the
+first `Tk_MainLoop` iteration then bailed.
+
+Fix (two edits, both in src/sim, committed conceptually here as patches):
+- `g_setup.c` `GetObjectXpms`: a missing frame is non-fatal - reuse frame 0 if we
+  have it, else `None`, and keep going.
+- `w_sprite.c` `DrawSprite`: skip frames whose pixmap is `None` (avoids a
+  `BadDrawable` every animation tick for the absent sprites).
+After this the sim stays in `Tk_MainLoop` and maps its window family (the
+`0xc000xx` Tk window group; several come up `IsViewable`).
+
+## Screenshot caveat on XmacII (depth 8)
+`xwd -root` on the guest XmacII can return a FROZEN tile (the gray root weave),
+unchanged even after `xsetroot -solid black` succeeds (rc=0) or new clients map.
+When that happens, screenshots do NOT reflect the live framebuffer - verify what
+is on screen by looking at the actual QEMU display, not via xwd->pnm. Confirm the
+sim is up instead with `ps`, `xlsclients`, and `xwininfo -id <win>` map state.
+
 ## 1-bit tiles - TODO
 The DUX tiles are colour; the SE/30 is 1-bit mono. Convert tile art to crisp B&W
-after first seeing how the originals dither.
+after first seeing how the originals dither. (The SE/30 hardware visual is 1-bit
+StaticGray, which Tk's colour code crashes on - the real-SE/30 target still needs
+the visual problem solved; the QEMU guest sidesteps it at depth 8.)
 
 ## Gotchas
 - The 128MB QEMU guest THRASHES/HANGS on the big native-ld links. Build libs
