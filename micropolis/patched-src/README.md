@@ -29,8 +29,24 @@ QEMU A/UX guest. See `../BUILD-NOTES.md` for the full story.
 Other diagnostic patches (startup traces, `SIGHUP` -> `SIG_IGN` in `sim.c`) are
 on the guest only and should be reverted for a production build.
 
-KNOWN ISSUE (depth 1): after the allocator fix the sim runs and enters
-Tk_MainLoop at depth 1, but XmacII still crashes on one of SimCity's depth-1
-draw operations (the sim then cascades via the non-fatal X error handler).
-Under investigation - the editor renders 1-bit tiles fine at depth 8, so this is
-an XmacII depth-1 rendering-path bug to be isolated and avoided.
+Depth-1 rendering is now fully working - editor AND overall map both draw in
+1-bit.  The fixes:
+
+- **`w_x.c`** - force `xd->shared = 0` on a 1-bit display (XmacII is unstable
+  with depth-1 shared-memory pixmaps); CatchXError logging.
+- **`g_map.c`** (`MemDrawMap`) - the mono map dithers an 8-bit buffer to 1-bit
+  and `XPutImage`s it, but without shared memory the XImage header was never
+  created, so `XPutImage(...,NULL,...)` crashed XmacII.  Create a depth-1
+  `XYBitmap` image around the dither buffer lazily.
+- **`w_map.c`** (`DoUpdateMap`) - proper map invalidation wasn't firing at
+  depth 1, leaving the Overall Map blank; force a full redraw each update (the
+  map is small, so it's cheap).
+- **`g_smmaps.c`** (`DRAW_BEGIN`) - the small-map tile blit used
+  `pixelBytes = view->pixel_bytes`, which is 0 at depth 1, collapsing the column
+  stride to 0 so every tile drew into the first 3 columns.  The 8-bit map buffer
+  needs `pixelBytes = 1` in mono.  This was why the minimap was a near-empty box.
+
+Test harness: `res/simcity.tcl` `UIStartSimCity` auto-loads a scenario when
+`AUXSIM_AUTOLOAD=<1-8>` is set in the environment (so headless testing needs no
+human at the picker).  Normal play is unaffected when unset.  (simcity.tcl is an
+EA/Maxis asset and is NOT committed; the one-paragraph hook is documented here.)
