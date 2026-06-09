@@ -15,6 +15,22 @@ QEMU A/UX guest. See `../BUILD-NOTES.md` for the full story.
 - **`w_sprite.c`** - `DrawSprite` skips any frame whose pixmap is `None`, so the
   absent sprites don't provoke a `BadDrawable` on every animation tick.
 
-Other diagnostic patches (CatchXError logging in `w_x.c`, startup traces and
-`xd->shared = 0` to disable XShm, `SIGHUP` -> `SIG_IGN` in `sim.c`) are on the
-guest only and should be reverted for a production build.
+- **`auxmalloc.c`** - replacement malloc/free/realloc/calloc (canonical K&R
+  section-8.7 coalescing allocator, sbrk-backed). A/UX's libc malloc corrupts
+  its own arena under Tk 2.3's allocation pattern on a depth-1 (monochrome)
+  display, crashing wish/SimCity inside malloc during main-window creation
+  (proven by interposing a debug allocator: Tk init then completes cleanly).
+  Link this ahead of libc so the statically-linked Tcl/Tk/sim use it; shared
+  Xlib keeps libc malloc (its own pattern is fine - xterm runs at depth 1).
+  **This is what makes SimCity initialise and run at depth 1 at all.**
+- **`w_x.c`** - also forces `xd->shared = 0` on a 1-bit display (XmacII is
+  unstable drawing depth-1 shared-memory pixmaps), plus the CatchXError logging.
+
+Other diagnostic patches (startup traces, `SIGHUP` -> `SIG_IGN` in `sim.c`) are
+on the guest only and should be reverted for a production build.
+
+KNOWN ISSUE (depth 1): after the allocator fix the sim runs and enters
+Tk_MainLoop at depth 1, but XmacII still crashes on one of SimCity's depth-1
+draw operations (the sim then cascades via the non-fatal X error handler).
+Under investigation - the editor renders 1-bit tiles fine at depth 8, so this is
+an XmacII depth-1 rendering-path bug to be isolated and avoided.
