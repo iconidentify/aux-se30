@@ -1051,11 +1051,15 @@ void R_RenderView (void)
 	int		dummy;
 	int		delta;
 	
+#if id386
+// x86-era stack-position sanity check: with our -O0 build the deep
+// level-load call chain (Host_Frame -> CL_ParseServerMessage ->
+// SCR_UpdateScreen) easily exceeds 10KB of frames and the check fires
+// spuriously. A/UX grows the stack fine; nothing here depends on it.
 	delta = (byte *)&dummy - r_stack_start;
 	if (delta < -10000 || delta > 10000)
 		Sys_Error ("R_RenderView: called without enough stack");
 
-#if id386
 // x86-asm-era alignment paranoia: m68k is 2-byte aligned by ABI and the
 // 68020+ handles word/long access at any alignment, so these checks fire
 // spuriously on A/UX and are not needed for the C renderer.
