@@ -122,6 +122,13 @@ static qboolean private_cmap = false;
 static unsigned char st2d_8to8table[256];
 static unsigned long alloced_pixels[256];
 static int n_alloced = 0;
+
+// AUX: integer pixel-doubling (-scale N, depth 8 only). The window is
+// vid.width*x_scale x vid.height*x_scale; the renderer stays at
+// vid.width x vid.height and dirty rects are expanded NxN into
+// x_scaleimage before XPutImage. Bigger window, same render cost.
+static int x_scale = 1;
+static XImage *x_scaleimage = 0;
 static int shiftmask_fl=0;
 static long r_shift,g_shift,b_shift;
 static unsigned long r_mask,g_mask,b_mask;
@@ -341,14 +348,42 @@ void VID_AllocSharedPalette(unsigned char *palette)
 	}
 }
 
+// AUX: expand a dirty rect NxN from the render image into the scale
+// image (depth 8 / 1 byte per pixel only)
+
+void st_scale( XImage *src, XImage *dst, int x, int y, int width, int height)
+{
+	int yi, i, s;
+	unsigned char *sp, *d0, *dr;
+	int n = x_scale;
+
+	if( (x<0)||(y<0) )return;
+
+	for (yi = y; yi < (y+height); yi++)
+	{
+		sp = (unsigned char *)src->data + yi*src->bytes_per_line + x;
+		d0 = (unsigned char *)dst->data + yi*n*dst->bytes_per_line + x*n;
+		dr = d0;
+		for (i=0 ; i<width ; i++)
+			for (s=0 ; s<n ; s++)
+				*dr++ = sp[i];
+		for (s=1 ; s<n ; s++)
+			memcpy(d0 + s*dst->bytes_per_line, d0, width*n);
+	}
+}
+
 // ========================================================================
 // Tragic death handler
 // ========================================================================
 
 void TragicDeath(int signal_num)
 {
-	XAutoRepeatOn(x_disp);
-	XCloseDisplay(x_disp);
+	if (x_disp)
+	{
+		XAutoRepeatOn(x_disp);
+		XCloseDisplay(x_disp);
+		x_disp = 0;	// VID_Shutdown must not close it again
+	}
 	Sys_Error("This death brought to you by the number %d\n", signal_num);
 }
 
@@ -429,6 +464,28 @@ void ResetFrameBuffer(void)
 
 	if (!x_framebuffer[0])
 		Sys_Error("VID: XCreateImage failed\n");
+
+	if (x_scaleimage)
+	{
+		free(x_scaleimage->data);
+		free(x_scaleimage);
+		x_scaleimage = 0;
+	}
+	if (x_scale > 1)
+	{
+		mem = ((vid.width*x_scale*pwidth+7)&~7) * vid.height*x_scale;
+		x_scaleimage = XCreateImage(	x_disp,
+			x_vis,
+			x_visinfo->depth,
+			ZPixmap,
+			0,
+			malloc(mem),
+			vid.width*x_scale, vid.height*x_scale,
+			32,
+			0);
+		if (!x_scaleimage)
+			Sys_Error("VID: XCreateImage (scale) failed\n");
+	}
 
 	vid.buffer = (byte*) (x_framebuffer[0]);
 	vid.conbuffer = vid.buffer;
@@ -595,6 +652,17 @@ void	VID_Init (unsigned char *palette)
 			Sys_Error("VID: Bad window height\n");
 	}
 
+// AUX: -scale N = pixel-double the window N times (render res unchanged)
+	if ((pnum=COM_CheckParm("-scale"))) {
+		if (pnum >= com_argc-1)
+			Sys_Error("VID: -scale <1-4>\n");
+		x_scale = Q_atoi(com_argv[pnum+1]);
+		if (x_scale < 1)
+			x_scale = 1;
+		if (x_scale > 4)
+			x_scale = 4;
+	}
+
 	template_mask = 0;
 
 // specify a visual id
@@ -660,11 +728,15 @@ void	VID_Init (unsigned char *palette)
 	   attribs.border_pixel = 0;
 	   attribs.colormap = tmpcmap;
 
+// scaling is 8-bit-only (st_scale assumes 1 byte/pixel)
+	if (x_scale > 1 && x_visinfo->depth != 8)
+		x_scale = 1;
+
 // create the main window
 		x_win = XCreateWindow(	x_disp,
 			XRootWindow(x_disp, x_visinfo->screen),
 			0, 0,	// x, y
-			vid.width, vid.height,
+			vid.width*x_scale, vid.height*x_scale,
 			0, // borderwidth
 			x_visinfo->depth,
 			InputOutput,
@@ -672,6 +744,17 @@ void	VID_Init (unsigned char *palette)
 			attribmask,
 			&attribs );
 		XStoreName( x_disp,x_win,"xquake");
+
+// AUX: pin the window size. The ConfigureNotify resize path tears the
+// framebuffer down mid-frame and crashes; sizing is launch-time only
+// (-winsize/-width/-height/-scale).
+		{
+			XSizeHints hints;
+			hints.flags = PMinSize | PMaxSize;
+			hints.min_width = hints.max_width = vid.width*x_scale;
+			hints.min_height = hints.max_height = vid.height*x_scale;
+			XSetWMNormalHints(x_disp, x_win, &hints);
+		}
 
 
 		if (x_visinfo->class != TrueColor)
@@ -817,8 +900,12 @@ void VID_SetPalette(unsigned char *palette)
 void	VID_Shutdown (void)
 {
 	Con_Printf("VID_Shutdown\n");
-	XAutoRepeatOn(x_disp);
-	XCloseDisplay(x_disp);
+	if (x_disp)
+	{
+		XAutoRepeatOn(x_disp);
+		XCloseDisplay(x_disp);
+		x_disp = 0;
+	}
 }
 
 int XLateKey(XKeyEvent *ev)
@@ -984,8 +1071,8 @@ void GetEvent(void)
 
 	case MotionNotify:
 		if (_windowed_mouse.value) {
-			mouse_x = (float) ((int)x_event.xmotion.x - (int)(vid.width/2));
-			mouse_y = (float) ((int)x_event.xmotion.y - (int)(vid.height/2));
+			mouse_x = (float) ((int)x_event.xmotion.x - (int)(vid.width*x_scale/2)) / x_scale;
+			mouse_y = (float) ((int)x_event.xmotion.y - (int)(vid.height*x_scale/2)) / x_scale;
 //printf("m: x=%d,y=%d, mx=%3.2f,my=%3.2f\n", 
 //	x_event.xmotion.x, x_event.xmotion.y, mouse_x, mouse_y);
 
@@ -994,15 +1081,15 @@ void GetEvent(void)
 				|KeyReleaseMask|ExposureMask
 				|ButtonPressMask
 				|ButtonReleaseMask);
-			XWarpPointer(x_disp,None,x_win,0,0,0,0, 
-				(vid.width/2),(vid.height/2));
+			XWarpPointer(x_disp,None,x_win,0,0,0,0,
+				(vid.width*x_scale/2),(vid.height*x_scale/2));
 			XSelectInput(x_disp,x_win,StructureNotifyMask|KeyPressMask
 				|KeyReleaseMask|ExposureMask
 				|PointerMotionMask|ButtonPressMask
 				|ButtonReleaseMask);
 		} else {
-			mouse_x = (float) (x_event.xmotion.x-p_mouse_x);
-			mouse_y = (float) (x_event.xmotion.y-p_mouse_y);
+			mouse_x = (float) (x_event.xmotion.x-p_mouse_x) / x_scale;
+			mouse_y = (float) (x_event.xmotion.y-p_mouse_y) / x_scale;
 			p_mouse_x=x_event.xmotion.x;
 			p_mouse_y=x_event.xmotion.y;
 		}
@@ -1033,10 +1120,16 @@ void GetEvent(void)
 		break;
 	
 	case ConfigureNotify:
-//printf("config notify\n");
-		config_notify_width = x_event.xconfigure.width;
-		config_notify_height = x_event.xconfigure.height;
-		config_notify = 1;
+		// AUX: plain window MOVES also send ConfigureNotify, and the
+		// resize path is not safe mid-frame - only honor an actual
+		// size change (the WM size hints should prevent any)
+		if (x_event.xconfigure.width != vid.width*x_scale ||
+		    x_event.xconfigure.height != vid.height*x_scale)
+		{
+			config_notify_width = x_event.xconfigure.width;
+			config_notify_height = x_event.xconfigure.height;
+			config_notify = 1;
+		}
 		break;
 
 	default:
@@ -1138,8 +1231,18 @@ void	VID_Update (vrect_t *rects)
 				st3_fixup( x_framebuffer[current_framebuffer],
 					rects->x, rects->y, rects->width,
 					rects->height);
-			XPutImage(x_disp, x_win, x_gc, x_framebuffer[0], rects->x,
-				rects->y, rects->x, rects->y, rects->width, rects->height);
+			if (x_scale > 1)
+			{
+				st_scale(x_framebuffer[0], x_scaleimage,
+					rects->x, rects->y, rects->width, rects->height);
+				XPutImage(x_disp, x_win, x_gc, x_scaleimage,
+					rects->x*x_scale, rects->y*x_scale,
+					rects->x*x_scale, rects->y*x_scale,
+					rects->width*x_scale, rects->height*x_scale);
+			}
+			else
+				XPutImage(x_disp, x_win, x_gc, x_framebuffer[0], rects->x,
+					rects->y, rects->x, rects->y, rects->width, rects->height);
 			rects = rects->pnext;
 		}
 		XSync(x_disp, False);
