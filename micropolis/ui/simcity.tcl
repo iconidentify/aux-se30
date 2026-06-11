@@ -142,7 +142,7 @@ set FontInfo {
 
 
 set MapTitles {
-  {SimCity Overall Map}
+  {Map}
   {Residential Zone Map}
   {Commercial Zone Map}
   {Industrial Zone Map}
@@ -247,7 +247,10 @@ set ToolInfo {
 ########################################################################
 
 
-wm title . {SimCity Root}
+wm title . {SimCity}
+# The wish main window is unused (everything is a toplevel) - hide the empty
+# "SimCity Root" window so it never shows.
+wm withdraw .
 
 
 if {"[sim Platform]" == "msdos"} {
@@ -873,9 +876,9 @@ proc WithdrawAll {} {
 
 
 proc ShowInitial {} {
-  ShowHeads
+  # Messages (heads) and the overall map no longer auto-open; open them on
+  # demand from the editor's Windows menu (ShowHeadOf / ShowMapOf).
   ShowEditors
-  ShowMaps
   EnableMaps
 }
 
@@ -891,25 +894,19 @@ proc PrepHead {head} {
     uninitialized {
     }
     scenario {
-      ShowHeadOf $head
       ShowScenarioOf $head
-      ShowMapOf $head
       DisableMaps
       ReShowPictureOn $head
       sim UpdateEditors
       sim UpdateMaps
     }
     play {
-      ShowHeadOf $head
       ShowEditorOf $head
-      ShowMapOf $head
       EnableMaps
       ReShowPictureOn $head
       InitHead $head
       InitHeadMenus $head
-      ShowHeadOf $head
       ShowEditorOf $head
-      ShowMapOf $head
     }
   }
 }
@@ -2132,9 +2129,9 @@ proc UISetDemand {r c i} {
     foreach win $EditorInfoWindows {
       catch {
 	set can [WindowLink $win.edemand]
-	$can coords r 15 $ry0 27 $ry1
-	$can coords c 36 $cy0 48 $cy1
-	$can coords i 57 $iy0 69 $iy1
+	$can coords r 8 $ry0 14 $ry1
+	$can coords c 17 $cy0 23 $cy1
+	$can coords i 26 $iy0 32 $iy1
       }
     }
   }
@@ -2489,28 +2486,103 @@ proc InitScenarios {} {
     set next normal
   }
   global ScenarioWindows
-  foreach win $ScenarioWindows {
-    [WindowLink $win.last] config -state $last
-    [WindowLink $win.next] config -state $next
+  catch {
+    foreach win $ScenarioWindows {
+      [WindowLink $win.last] config -state $last
+      [WindowLink $win.next] config -state $next
+    }
   }
 }
 
 
 proc InitScenario {win} {
   global MapHistory MapHistoryNum
-  if {$MapHistoryNum < 1} {
-    set last disabled
-  } else {
-    set last normal
+  # the revamped splash has no Previous/Next-map or vote buttons; guard the old
+  # references so InitScenario is a no-op there instead of erroring.
+  catch {
+    if {$MapHistoryNum < 1} {
+      set last disabled
+    } else {
+      set last normal
+    }
+    if {$MapHistoryNum == ([llength $MapHistory] - 1)} {
+      set next disabled
+    } else {
+      set next normal
+    }
+    [WindowLink $win.last] config -state $last
+    [WindowLink $win.next] config -state $next
   }
-  if {$MapHistoryNum == ([llength $MapHistory] - 1)} {
-    set next disabled
-  } else {
-    set next normal
+  catch {UpdateVotesForUseThisMap}
+}
+
+
+proc UINewCityDialog {head} {
+  # The "Start New City" screen: city name + difficulty, then Create City.
+  global CityName GameLevel
+  if {![info exists CityName] || [string trim "$CityName"] == "" || "$CityName" == "NowHere"} {
+    set CityName "New City"
   }
-  [WindowLink $win.last] config -state $last
-  [WindowLink $win.next] config -state $next
-  UpdateVotesForUseThisMap
+  if {![info exists GameLevel] || $GameLevel == -1} {
+    set GameLevel 0
+  }
+  set win .newcity
+  catch {destroy $win}
+  toplevel $win -screen [winfo screen $head] -borderwidth 2 -relief raised
+  wm title $win {New City}
+  wm iconname $win {New City}
+  wm geometry $win +470+130
+  wm minsize $win 320 1
+  wm protocol $win delete "destroy $win"
+
+  frame $win.name -borderwidth 6 -relief flat
+  label $win.name.l -text {City Name:} -font [Font $win Text]
+  entry $win.name.e -textvariable CityName -font [Font $win Text]
+  bind $win.name.e <Any-Enter> {focus %W}
+  bind $win.name.e <Return> "destroy $win ; UIStartNewCity $head"
+  pack append $win.name \
+    $win.name.l {left frame e} \
+    $win.name.e {left frame e expand fillx}
+
+  frame $win.level -borderwidth 6 -relief flat
+  label $win.level.l -text {Difficulty:} -font [Font $win Text]
+  frame $win.level.r -borderwidth 0 -relief flat
+  radiobutton $win.level.r.easy -text {Easy     $20,000} -variable GameLevel -value 0 -command "DoSetGameLevel 0" -font [Font $win Large]
+  radiobutton $win.level.r.medium -text {Medium   $10,000} -variable GameLevel -value 1 -command "DoSetGameLevel 1" -font [Font $win Large]
+  radiobutton $win.level.r.hard -text {Hard      $5,000} -variable GameLevel -value 2 -command "DoSetGameLevel 2" -font [Font $win Large]
+  pack append $win.level.r \
+    $win.level.r.easy {top frame w} \
+    $win.level.r.medium {top frame w} \
+    $win.level.r.hard {top frame w}
+  pack append $win.level \
+    $win.level.l {left frame nw} \
+    $win.level.r {left frame nw expand fillx}
+
+  frame $win.b -borderwidth 6 -relief flat
+  button $win.b.create -text {Create City} -font [Font $win Large] -relief raised -borderwidth 2 -command "destroy $win ; UIStartNewCity $head"
+  button $win.b.back -text {Back} -font [Font $win Large] -relief raised -borderwidth 2 -command "destroy $win"
+  pack append $win.b \
+    $win.b.create {left frame center expand fillx} \
+    $win.b.back {left frame center expand fillx}
+
+  pack append $win \
+    $win.name {top frame center fillx} \
+    $win.level {top frame center fillx} \
+    $win.b {top frame center fillx}
+
+  wm deiconify $win
+  wm raise $win
+}
+
+
+proc UIStartNewCity {win} {
+  # The fresh random map was already generated when the start screen opened
+  # (UIGenerateCityNow). Just commit it with the chosen name/difficulty and go
+  # straight to the editor - no regenerate (that races and crashes), no voting,
+  # no notice modal.
+  global CityName
+  if {[string trim "$CityName"] == ""} { set CityName "New City" }
+  UIUseThisMap
 }
 
 
@@ -2568,9 +2640,11 @@ proc GotoHistory {i} {
     set next normal
   }
   global ScenarioWindows
-  foreach win $ScenarioWindows {
-    [WindowLink $win.last] config -state $last
-    [WindowLink $win.next] config -state $next
+  catch {
+    foreach win $ScenarioWindows {
+      [WindowLink $win.last] config -state $last
+      [WindowLink $win.next] config -state $next
+    }
   }
 }
 
@@ -2694,15 +2768,12 @@ proc WithdrawKeys {} {
 
 
 proc UIGetKey {win} {
-  ShowKeyOf [WindowLink $win.head]
+  # registration/key system removed - the game is fully unlocked.
 }
 
 
 proc UIGetKeys {} {
-  global HeadWindows
-  foreach win $HeadWindows {
-    ShowKeyOf $win
-  }
+  # registration/key system removed - the game is fully unlocked.
 }
 
 
@@ -2820,15 +2891,10 @@ proc AskQuestionOn {head color title text left middle right} {
   ShowAskOf $head
 
   set win [WindowLink $head.ask]
-  set t [WindowLink $win.title]
-  $t configure -text $title
-  $t configure -background $color
-
-  set t [WindowLink $win.text]
-  $t configure -state normal
-  $t delete 0.0 end
-  $t insert end "${text}\n"
-  $t configure -state disabled
+  # name the modal for its use case; no coloured banner, centered message text
+  wm title $win $title
+  wm iconname $win $title
+  [WindowLink $win.text] configure -text $text
 
   set bf [WindowLink $win.frame]
   set l [WindowLink $win.left]
@@ -2841,9 +2907,9 @@ proc AskQuestionOn {head color title text left middle right} {
 	-text [lindex $left 0] \
 	-command [format [lindex $left 2] $head]
     SetHelp $l [lindex $left 1]
-    pack append $bf $l {left frame center}
+    pack append $bf $l {left frame center padx 8}
   } else {
-    pack unpack $l
+    catch {pack unpack $l}
   }
 
   if {$middle != ""} {
@@ -2851,9 +2917,9 @@ proc AskQuestionOn {head color title text left middle right} {
 	-text [lindex $middle 0] \
 	-command [format [lindex $middle 2] $head]
     SetHelp $m [lindex $middle 1]
-    pack append $bf $m {left frame center expand}
+    pack append $bf $m {left frame center padx 8}
   } else {
-    pack unpack $m
+    catch {pack unpack $m}
   }
 
   if {$right != ""} {
@@ -2864,9 +2930,10 @@ proc AskQuestionOn {head color title text left middle right} {
 	-text [lindex $right 0] \
 	-command $cmd
     SetHelp $r [lindex $right 1]
-    pack append $bf $rf {right frame center}
+    pack append $bf $rf {left frame center padx 8}
+    catch {focus $r}
   } else {
-    pack unpack $rf
+    catch {pack unpack $rf}
   }
 
   InitVotesForAsk
@@ -2979,6 +3046,43 @@ proc WithdrawNotices {} {
 proc ReShowPictureOn {{head ""}} {
   global ShowingPicture ShowingParms
   UIShowPictureOn $head $ShowingPicture $ShowingParms
+}
+
+
+proc UIAbout {head} {
+  set win .about
+  catch {destroy $win}
+  toplevel $win -screen [winfo screen $head] -borderwidth 2 -relief raised
+  wm title $win {About SimCity}
+  wm iconname $win {About SimCity}
+  wm geometry $win +470+90
+  wm minsize $win 380 1
+  wm protocol $win delete "destroy $win"
+
+  frame $win.top -borderwidth 8 -relief flat
+  label $win.top.simcity -bitmap "@images/simcitybig.xpm"
+  pack append $win.top $win.top.simcity {top frame center}
+
+  message $win.about\
+    -aspect 1000 -justify center\
+    -font [Font $win Small]\
+    -text {Micropolis (SimCity) version 4.0
+Designed by Will Wright - Maxis, 1989
+X11 Multi-Player port by Don Hopkins
+(C) 1989-2002 Electronic Arts / Maxis - GPL Micropolis
+A/UX X11R6 revival by @SiliconForested - C89 Summer 2026}
+
+  frame $win.b -borderwidth 8 -relief flat
+  button $win.b.ok -text {OK} -font [Font $win Large] -relief raised -borderwidth 2 -command "destroy $win"
+  pack append $win.b $win.b.ok {top frame center}
+
+  pack append $win\
+    $win.top	{top frame center fillx}\
+    $win.about	{top frame center fillx}\
+    $win.b	{top frame center fillx}
+
+  wm deiconify $win
+  wm raise $win
 }
 
 
@@ -3419,13 +3523,13 @@ proc EditorSetTool {win state} {
 
 # --- Modernised palette: hover info + status panel (added for A/UX) ---------
 set EditorToolNames {
-  Residential Commercial Industrial {Fire Dept} Query
-  {Police Dept} {Power Line} Bulldozer Rail Road
+  Residential Commercial Industrial Fire Query
+  Police Power Bulldozer Rail Road
   Chalk Eraser Stadium Park Seaport
-  {Coal Power} {Nuclear Power} Airport
+  Coal Nuclear Airport
 }
 set EditorToolDescs {
-  {Homes  $100} {Shops  $100} {Factories  $100}
+  {Zone  $100} {Zone  $100} {Zone  $100}
   {$500} {Inspect}
   {$500} {$5} {Clear  $1}
   {$20} {$10}
@@ -3572,6 +3676,9 @@ proc UIStartSimCity {homedir resourcedir keydir hostname} {
     set auxsim_speed 1
     if {[info exists env(AUXSIM_SPEED)]} { set auxsim_speed $env(AUXSIM_SPEED) }
     after 4000 "catch {UILoadScenario $auxsim_scen} ; after 1500 {catch {UIUseThisMap} ; catch {sim Speed $auxsim_speed}}"
+  } else {
+    # Normal launch: go straight to the Welcome / start screen.
+    after 300 {catch {UIPickScenarioMode}}
   }
 }
 
@@ -3587,16 +3694,16 @@ proc UISelectCity {win} {
 
 proc UIQuit {head} {
   if {[sim Players] == 1} {
-    set l "{Keep playing.} Quit.No {RejectPlan}"
+    set l "{Cancel} Quit.No {RejectPlan}"
     set m ""
-    set r "{I quit!} Quit.IQuit {DoReallyQuit %s}"
+    set r "{Quit} Quit.IQuit {DoReallyQuit %s}"
   } else {
-    set l "{Keep playing.} Quit.No {RejectPlan}"
-    set m "{I quit!} Quit.IResign {DoIResign %s}"
-    set r "{Everyone quit!} Quit.AllQuit {DoReallyQuit %s}"
+    set l "{Cancel} Quit.No {RejectPlan}"
+    set m "{Quit Me} Quit.IResign {DoIResign %s}"
+    set r "{Quit All} Quit.AllQuit {DoReallyQuit %s}"
   }
-  AskQuestion [Color $head #ff0000 #ffffff] "Quit Playing SimCity" \
-    "Do you want to quit playing SimCity?" \
+  AskQuestion "" "Quit SimCity" \
+    "Are you sure you want to quit SimCity?" \
     $l $m $r
 }
 
@@ -3633,11 +3740,14 @@ proc UIPickScenarioMode {} {
   InitScenarios
   InitVotesForUseThisMap
   InitKeys
-  ShowHeads
-  ShowMaps
   DisableMaps
   ShowScenarios
-  UIShowPicture 300
+  # Only the Welcome/start screen should be visible - hide anything (editor,
+  # map, notice, messages) that the city-generation step may have surfaced.
+  catch {WithdrawEditors}
+  catch {WithdrawMaps}
+  catch {WithdrawNotices}
+  catch {WithdrawHeads}
 }
 
 
@@ -3680,7 +3790,8 @@ proc DoNewCity {name level {r ""} {tl -1} {ll -1} {cl -1} {ci -1}} {
   }
   sim CityName $name
   sim GameLevel $level
-  UIShowPicture 25
+  # (was UIShowPicture 25 - the "Build your very own city" notice modal; removed
+  # so creating a new city doesn't pop a confusing modal.)
 }
 
 
@@ -3724,10 +3835,13 @@ proc DoVote {win name notify preview} {
 proc InitVotesForUseThisMap {} {
   global VotesForUseThisMap ScenarioWindows
   set VotesForUseThisMap {}
-  foreach win $ScenarioWindows {
-    [WindowLink $win.vote] config -relief raised
+  # the revamped welcome window has no vote button - guard the old reference
+  catch {
+    foreach win $ScenarioWindows {
+      [WindowLink $win.vote] config -relief raised
+    }
   }
-  UpdateVotesForUseThisMap
+  catch {UpdateVotesForUseThisMap}
 }
 
 
@@ -3865,19 +3979,9 @@ proc AddPlayer {display} {
     UISetMessage "Added a player on X11 Display \"$display\"."
     UpdatePlayers
   } else {
+    # No licence/key gating - the game is fully unlocked for multiplayer.
+    # A null head here just means this X display couldn't be opened.
     UISetMessage "Couldn't add a player on X11 Display \"$display\"!"
-    global HeadWindows
-    if {[llength $HeadWindows] != 0} {
-      case [sim Type] {
-	{2 -2} { }
-	default {
-	  UISetMessage "You need a Multi Player license!"
-	  UIShowPicture 47
-	  UIGetKeys
-	  UIMakeSound warning Sorry
-	}
-      }
-    }
   }
   return $head
 }
@@ -3895,7 +3999,6 @@ proc Kaboom {} {
   UIMakeSound warning Oop {"-repeat 16"}
   UIMakeSound warning Boing {"-repeat 5"}
   after 1000 UIShowPicture 45
-  after 2000 UIGetKeys
   after 3000 UIMakeSound warning Sorry
 }
 
@@ -4042,7 +4145,7 @@ proc UISetCityName {name} {
   global EditorWindows
   global CityName
   set CityName $name
-  set title "SimCity Editor on $name"
+  set title "SimCity - $name"
   foreach win $EditorWindows {
     wm title $win "$title"
     wm iconname $win "$title"
@@ -4074,14 +4177,21 @@ proc DoLoadCity {filename} {
 }
 
 proc UIDidLoadCity {} {
-  global State GameLevel Scenario
+  global State GameLevel Scenario OldBudget
   set Scenario -1
   set GameLevel -1
-  if {$State == "play"} {
-    UIPlayGame
-  } else {
-    UIShowPicture 26 [sim CityFileName]
-  }
+  # Start the game with the loaded city. Do NOT call UINewGame - its
+  # sim InitGame would wipe the loaded city's saved graph history. Initialise
+  # the windows but keep the loaded simulation state (map, funds, history).
+  WithdrawAll
+  set OldBudget 0
+  sim EraseOverlay
+  InitEditors
+  InitMaps
+  InitGraphs
+  update
+  sim UpdateMaps
+  UIPlayGame
 }
 
 

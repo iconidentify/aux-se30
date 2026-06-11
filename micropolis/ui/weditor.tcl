@@ -27,7 +27,7 @@
   bind $win <Enter> "LinkWindow $head.editor $win"
 
   global CityName
-  wm title $win "SimCity Editor"
+  wm title $win "SimCity"
   wm iconname $win $CityName
   wm group $win $head
   wm geometry $win 550x535+440+5
@@ -58,14 +58,15 @@
   tk_bindForTraversal $win.topframe.controls.file.m
   bind $win.topframe.controls.file.m <F10> {tk_firstMenu %W}
   bind $win.topframe.controls.file.m <Mod2-Key> {tk_traverseToMenu %W %A}
+    $win.topframe.controls.file.m add command -label {New City...} -command "UINewCityDialog $head"
+    $win.topframe.controls.file.m add command -label {Open City...} -command "UILoadCity $head"
+    $win.topframe.controls.file.m add separator
     $win.topframe.controls.file.m add command -label {Save City} -command "UISaveCity $head"
-    $win.topframe.controls.file.m add command -label {Save City as...} -command "UISaveCityAs $head"
-    $win.topframe.controls.file.m add command -label {Another City!} -command "UISelectCity $head"
+    $win.topframe.controls.file.m add command -label {Save City As...} -command "UISaveCityAs $head"
     $win.topframe.controls.file.m add separator
     $win.topframe.controls.file.m add command -label {Add Player...} -command "UIShowPlayer $head"
-    $win.topframe.controls.file.m add command -label {Get Key...} -command "UIGetKey $head"
     $win.topframe.controls.file.m add separator
-    $win.topframe.controls.file.m add command -label {Quit Playing!} -command "UIQuit $head"
+    $win.topframe.controls.file.m add command -label {Quit} -command "UIQuit $head"
 
   # ---- Options ----
   menubutton $win.topframe.controls.options\
@@ -112,11 +113,11 @@
     $win.topframe.controls.speed.m add radiobutton -label {Medium} -value {2} -variable Time -command {sim Speed 2}
     $win.topframe.controls.speed.m add radiobutton -label {Fast} -value {3} -variable Time -command {sim Speed 3}
     $win.topframe.controls.speed.m add separator
-    $win.topframe.controls.speed.m add radiobutton -label {Priority: Flat Out!} -value {7} -variable Priority -command {sim Delay 2}
-    $win.topframe.controls.speed.m add radiobutton -label {Priority: Zoom Zoom} -value {6} -variable Priority -command {sim Delay 25}
-    $win.topframe.controls.speed.m add radiobutton -label {Priority: Buzz Buzz} -value {5} -variable Priority -command {sim Delay 100}
-    $win.topframe.controls.speed.m add radiobutton -label {Priority: Putter Putter} -value {2} -variable Priority -command {sim Delay 250}
-    $win.topframe.controls.speed.m add radiobutton -label {Priority: Snore Snore} -value {0} -variable Priority -command {sim Delay 1000}
+    $win.topframe.controls.speed.m add radiobutton -label {Priority: Highest} -value {7} -variable Priority -command {sim Delay 2}
+    $win.topframe.controls.speed.m add radiobutton -label {Priority: High} -value {6} -variable Priority -command {sim Delay 25}
+    $win.topframe.controls.speed.m add radiobutton -label {Priority: Normal} -value {5} -variable Priority -command {sim Delay 100}
+    $win.topframe.controls.speed.m add radiobutton -label {Priority: Low} -value {2} -variable Priority -command {sim Delay 250}
+    $win.topframe.controls.speed.m add radiobutton -label {Priority: Lowest} -value {0} -variable Priority -command {sim Delay 1000}
 
   # ---- Disasters ----
   menubutton $win.topframe.controls.disasters\
@@ -155,6 +156,7 @@
     $win.topframe.controls.windows.m add command -label {Graph} -command "ShowGraphOf $head"
     $win.topframe.controls.windows.m add command -label {Map} -command "ShowMapOf $head"
     $win.topframe.controls.windows.m add command -label {Editor} -command "ShowEditorOf $head"
+    $win.topframe.controls.windows.m add command -label {Messages} -command "ShowHeadOf $head"
     $win.topframe.controls.windows.m add separator
     $win.topframe.controls.windows.m add command -label {Map Copy} -command "NewMapOf $head"
     $win.topframe.controls.windows.m add command -label {Editor Copy} -command "NewEditorOf $head"
@@ -171,7 +173,7 @@
   tk_bindForTraversal $win.topframe.controls.help.m
   bind $win.topframe.controls.help.m <F10> {tk_firstMenu %W}
   bind $win.topframe.controls.help.m <Mod2-Key> {tk_traverseToMenu %W %A}
-    $win.topframe.controls.help.m add command -label {About...} -command "UIShowPicture 300"
+    $win.topframe.controls.help.m add command -label {About SimCity} -command "UIAbout $head"
 
   pack append $win.topframe.controls\
     $win.topframe.controls.file {left frame nw}\
@@ -368,16 +370,17 @@
   # fixed-size status panel (frame -width/-height is honored here; the labels are
   # place'd so changing their text on hover cannot resize the panel -> no reflow,
   # so the packed tool buttons never shift out from under the cursor).
+  # labels measured at 20px tall each; frame 46 fits both with margin (inner ~42)
   frame $win.leftframe.status\
-    -borderwidth 2 -relief sunken -width 84 -height 34
+    -borderwidth 2 -relief sunken -width 84 -height 46
   label $win.leftframe.status.name\
     -font [Font $win Small] -text {Bulldozer} -anchor w
   label $win.leftframe.status.desc\
     -font [Font $win Tiny] -text {Clear  $1} -anchor w
   LinkWindow $win.toolname $win.leftframe.status.name
   LinkWindow $win.tooldesc $win.leftframe.status.desc
-  place $win.leftframe.status.name -x 3 -y 2
-  place $win.leftframe.status.desc -x 3 -y 18
+  place $win.leftframe.status.name -x 4 -y 2
+  place $win.leftframe.status.desc -x 4 -y 22
 
   foreach pair {
     {r0.palletres 0} {r0.palletcom 1} {r1.palletind 2} {r2.palletfire 3} {r2.palletquery 4} {r1.palletpolice 5} {r4.palletwire 6} {r7.palletbulldozer 7} {r3.palletrail 8} {r3.palletroad 9} {r8.palletchalk 10} {r8.palleteraser 11} {r6.palletstadium 12} {r5.palletpark 13} {r6.palletseaport 14} {r4.palletcoal 15} {r5.palletnuclear 16} {r7.palletairport 17}
@@ -392,27 +395,49 @@
     bind $hb <Leave> "tk_butLeave %W ; EditorToolRestore $win"
   }
 
-  # RCI demand gauge below the buttons (mirrors the head window's indicator;
-  # UISetDemand updates this editor copy too via EditorInfoWindows/$win.edemand).
-  canvas $win.leftframe.demand\
+  # Below the buttons, left-justified: the RCI demand gauge (original demandg.xpm,
+  # R C I legend boxed under the bars) and a miniature map icon, side by side.
+  # Click the gauge -> historical line-graph window; click the map -> Map window.
+  frame $win.leftframe.info\
+    -borderwidth 0 -relief flat
+
+  canvas $win.leftframe.info.demand\
     -scrollincrement 0\
     -borderwidth 0\
-    -background #D0D0D0\
-    -width 84 -height 68
-  LinkWindow $win.edemand $win.leftframe.demand
-  $win.leftframe.demand create bitmap 0 0\
+    -background #BFBFBF\
+    -cursor hand2\
+    -width 39 -height 53
+  LinkWindow $win.edemand $win.leftframe.info.demand
+  $win.leftframe.info.demand create bitmap 0 4\
     -tags picture\
-    -bitmap "@images/rcigauge.xpm"\
+    -bitmap "@images/demandg.xpm"\
     -anchor nw
-  $win.leftframe.demand create rectangle -10 -10 1 1\
+  $win.leftframe.info.demand create rectangle -10 -10 1 1\
     -tags r\
     -fill [Color $win #00ff00 #000000]
-  $win.leftframe.demand create rectangle -10 -10 1 1\
+  $win.leftframe.info.demand create rectangle -10 -10 1 1\
     -tags c\
     -fill [Color $win #0000ff #000000]
-  $win.leftframe.demand create rectangle -10 -10 1 1\
+  $win.leftframe.info.demand create rectangle -10 -10 1 1\
     -tags i\
     -fill [Color $win #ffff00 #000000]
+  bind $win.leftframe.info.demand <ButtonRelease-1> "ShowGraphOf $head"
+
+  canvas $win.leftframe.info.map\
+    -scrollincrement 0\
+    -borderwidth 0\
+    -background #BFBFBF\
+    -cursor hand2\
+    -width 40 -height 53
+  $win.leftframe.info.map create bitmap 0 4\
+    -tags picture\
+    -bitmap "@images/mapicon.xpm"\
+    -anchor nw
+  bind $win.leftframe.info.map <ButtonRelease-1> "ShowMapOf $head"
+
+  pack append $win.leftframe.info\
+    $win.leftframe.info.demand	{left frame nw}\
+    $win.leftframe.info.map	{left frame nw}
 
   # date/funds now live in the top strip; register this editor so UISetFunds /
   # UISetDate / UISetDemand update those linked widgets ($win.efunds/edate/edemand).
@@ -421,7 +446,7 @@
 
   pack append $win.leftframe\
     $win.leftframe.tools	{top frame center}\
-    $win.leftframe.demand	{top frame center}\
+    $win.leftframe.info	{top frame center}\
     $win.leftframe.status	{bottom frame center fillx}
 
   # ---- bottom status bar: date | funds | notification message ----

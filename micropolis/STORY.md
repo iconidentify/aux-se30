@@ -174,12 +174,38 @@ A fully playable, multi-window, dithered 1-bit SimCity on Apple's UNIX: the city
 editor, the overall map, the RCI graph, disasters ("A Monster has been
 sighted!"), the works - on hardware and an OS from when the game was new.
 
+## Making it our own (the C89 Summer overhaul)
+
+Once it ran, we rebuilt the look. The whole interface is Tcl/Tk - a thin
+scripting skin over the C engine - so we could restyle everything without
+touching a line of the simulation. New work, all in the UI scripts:
+
+- a fresh **18-tool palette** (clean themed icons we drew and converted to XPM),
+  packed into a tight 2-column bar with a live **RCI demand gauge** and a
+  clickable **mini-map** beside it;
+- the old floating Controls window's menus **folded into the editor** as a
+  proper File / Options / Speed / Disasters / Windows / Help bar, with a bottom
+  status strip for date, funds and messages;
+- a redesigned **Welcome screen** and **About** box (with a tasteful C89 Summer
+  credit), a clean **New City** flow, and **modals** rebuilt to look like a real
+  application - centered text, uniform OK/Cancel buttons, an Enter-key default,
+  no garish banners;
+- the 1993 **license-key system removed** - it's the full game, always.
+
+The deepest cut was the toolkit itself. Tk 2.3 predates `bindtags`: an instance
+binding *replaces* the widget's class binding instead of adding to it. Our hover
+handlers were silently overriding Tk's own button machinery, so clicks stopped
+firing after the first mouse-over. The fixes (and a dozen other pre-Tk-4.0
+quirks) are written up in `micropolis/ui/README.md`.
+
 ## Where it lives
 
 - Repo: **github.com/iconidentify/aux-se30**
 - Build recipe: `micropolis/BUILD-NOTES.md`
 - Every patched source file + notes: `micropolis/patched-src/`
 - Missing-libc shims: `micropolis/compat.c`
+- The UI overhaul + Tk lessons: `micropolis/ui/README.md` (and the deployed
+  scripts + asset generators under `micropolis/ui/` and `micropolis/tools/`)
 
 The SimCity/Micropolis engine and Tcl/Tk are their authors' work (GPL); the
 copyrighted EA/Maxis demo assets are **not** included - bring your own from the
