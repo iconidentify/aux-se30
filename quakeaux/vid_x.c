@@ -110,6 +110,18 @@ typedef unsigned short PIXEL16;
 typedef unsigned long PIXEL24;
 static PIXEL16 st2d_8to16table[256];
 static PIXEL24 st2d_8to24table[256];
+
+// AUX: shared-colormap support. A private AllocAll colormap makes the
+// rest of the desktop flash to garbage whenever the quake window holds
+// colormap focus (one hardware palette on XmacII). Instead we allocate
+// read-only cells from the DEFAULT colormap (closest-match when full)
+// and remap rendered pixels through st2d_8to8table in VID_Update,
+// exactly like the 16/24-bit fixup paths. -privatecmap restores the
+// old exact-palette behavior.
+static qboolean private_cmap = false;
+static unsigned char st2d_8to8table[256];
+static unsigned long alloced_pixels[256];
+static int n_alloced = 0;
 static int shiftmask_fl=0;
 static long r_shift,g_shift,b_shift;
 static unsigned long r_mask,g_mask,b_mask;
@@ -252,6 +264,80 @@ void st3_fixup( XImage *framebuf, int x, int y, int width, int height)
 	}
 }
 
+
+// AUX: remap palette indices to shared-colormap pixel values, in place
+// (same in-place-on-dirty-rect semantics as st2_fixup/st3_fixup)
+
+void st1_fixup( XImage *framebuf, int x, int y, int width, int height)
+{
+	int yi;
+	unsigned char *src;
+	int count;
+
+	if( (x<0)||(y<0) )return;
+
+	for (yi = y; yi < (y+height); yi++) {
+		src = (unsigned char *)&framebuf->data [yi * framebuf->bytes_per_line + x];
+		for (count = 0; count < width; count++)
+			src[count] = st2d_8to8table[src[count]];
+	}
+}
+
+// AUX: build st2d_8to8table from the default colormap: allocate what we
+// can read-only/shared, closest-match the rest against a snapshot
+
+void VID_AllocSharedPalette(unsigned char *palette)
+{
+	XColor c;
+	XColor q[256];
+	int i, j, best, cmapsz;
+	long dist, bestdist;
+	int dr, dg, db;
+
+	if (n_alloced)
+	{
+		XFreeColors(x_disp, x_cmap, alloced_pixels, n_alloced, 0);
+		n_alloced = 0;
+	}
+
+	cmapsz = x_visinfo->colormap_size;
+	if (cmapsz > 256)
+		cmapsz = 256;
+	for (i=0 ; i<cmapsz ; i++)
+		q[i].pixel = i;
+	XQueryColors(x_disp, x_cmap, q, cmapsz);
+
+	for (i=0 ; i<256 ; i++)
+	{
+		c.red = palette[i*3] * 257;
+		c.green = palette[i*3+1] * 257;
+		c.blue = palette[i*3+2] * 257;
+		c.flags = DoRed|DoGreen|DoBlue;
+		if (XAllocColor(x_disp, x_cmap, &c))
+		{
+			st2d_8to8table[i] = (unsigned char) c.pixel;
+			alloced_pixels[n_alloced++] = c.pixel;
+		}
+		else
+		{
+			best = 0;
+			bestdist = 0x7fffffff;
+			for (j=0 ; j<cmapsz ; j++)
+			{
+				dr = (int)(q[j].red >> 8) - palette[i*3];
+				dg = (int)(q[j].green >> 8) - palette[i*3+1];
+				db = (int)(q[j].blue >> 8) - palette[i*3+2];
+				dist = dr*dr + dg*dg + db*db;
+				if (dist < bestdist)
+				{
+					bestdist = dist;
+					best = j;
+				}
+			}
+			st2d_8to8table[i] = (unsigned char) best;
+		}
+	}
+}
 
 // ========================================================================
 // Tragic death handler
@@ -482,9 +568,6 @@ void	VID_Init (unsigned char *palette)
 
 	XAutoRepeatOff(x_disp);
 
-// for debugging only
-	XSynchronize(x_disp, True);
-
 // check for command-line window size
 	if ((pnum=COM_CheckParm("-winsize")))
 	{
@@ -598,9 +681,20 @@ void	VID_Init (unsigned char *palette)
 		// create and upload the palette
 		if (x_visinfo->class == PseudoColor)
 		{
-			x_cmap = XCreateColormap(x_disp, x_win, x_vis, AllocAll);
-			VID_SetPalette(palette);
-			XSetWindowColormap(x_disp, x_win, x_cmap);
+			if (COM_CheckParm("-privatecmap"))
+			{
+				private_cmap = true;
+				x_cmap = XCreateColormap(x_disp, x_win, x_vis, AllocAll);
+				VID_SetPalette(palette);
+				XSetWindowColormap(x_disp, x_win, x_cmap);
+			}
+			else
+			{
+				// AUX: share the default colormap - no focus flashing
+				x_cmap = XDefaultColormap(x_disp, x_visinfo->screen);
+				VID_SetPalette(palette);
+				XSetWindowColormap(x_disp, x_win, x_cmap);
+			}
 		}
 	}
 
@@ -688,17 +782,30 @@ void VID_SetPalette(unsigned char *palette)
 
 	if (x_visinfo->class == PseudoColor && x_visinfo->depth == 8)
 	{
+		static int cmap_built = 0;
+
+		// shared-cmap rebuilds cost 256 server round-trips; skip
+		// when the palette hasn't actually changed
+		if (cmap_built && palette != current_palette
+		    && !memcmp(current_palette, palette, 768))
+			return;
+		cmap_built = 1;
 		if (palette != current_palette)
 			memcpy(current_palette, palette, 768);
-		for (i=0 ; i<256 ; i++)
+		if (private_cmap)
 		{
-			colors[i].pixel = i;
-			colors[i].flags = DoRed|DoGreen|DoBlue;
-			colors[i].red = palette[i*3] * 257;
-			colors[i].green = palette[i*3+1] * 257;
-			colors[i].blue = palette[i*3+2] * 257;
+			for (i=0 ; i<256 ; i++)
+			{
+				colors[i].pixel = i;
+				colors[i].flags = DoRed|DoGreen|DoBlue;
+				colors[i].red = palette[i*3] * 257;
+				colors[i].green = palette[i*3+1] * 257;
+				colors[i].blue = palette[i*3+2] * 257;
+			}
+			XStoreColors(x_disp, x_cmap, colors, 256);
 		}
-		XStoreColors(x_disp, x_cmap, colors, 256);
+		else
+			VID_AllocSharedPalette(palette);
 	}
 
 }
@@ -1017,12 +1124,16 @@ void	VID_Update (vrect_t *rects)
 	{
 		while (rects)
 		{
-			if (x_visinfo->depth == 16)
-				st2_fixup( x_framebuffer[current_framebuffer], 
+			if (x_visinfo->depth == 8 && !private_cmap)
+				st1_fixup( x_framebuffer[current_framebuffer],
+					rects->x, rects->y, rects->width,
+					rects->height);
+			else if (x_visinfo->depth == 16)
+				st2_fixup( x_framebuffer[current_framebuffer],
 					rects->x, rects->y, rects->width,
 					rects->height);
 			else if (x_visinfo->depth == 24)
-				st3_fixup( x_framebuffer[current_framebuffer], 
+				st3_fixup( x_framebuffer[current_framebuffer],
 					rects->x, rects->y, rects->width,
 					rects->height);
 			XPutImage(x_disp, x_win, x_gc, x_framebuffer[0], rects->x,
