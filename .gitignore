@@ -8,3 +8,6 @@ phosphor/
 # unrelated personal files
 self-portrait.svg
 portrait-of-you.svg
+
+# upstream id Quake clone (github.com/id-Software/Quake)
+quake-id/
