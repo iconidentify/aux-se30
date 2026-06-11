@@ -283,59 +283,61 @@ void st1_fixup( XImage *framebuf, int x, int y, int width, int height)
 	}
 }
 
-// AUX: build st2d_8to8table from the default colormap: allocate what we
-// can read-only/shared, closest-match the rest against a snapshot
+// AUX: build st2d_8to8table from the default colormap. First call
+// allocates read-only cells for the base palette and snapshots the
+// colormap; every later call (palette SHIFTS - damage/water flashes,
+// which arrive every frame underwater) is served from the snapshot
+// with ZERO server traffic. Re-allocating cells per shift was a
+// 256-round-trip-per-frame performance disaster.
+
+static XColor cmap_snapshot[256];
+static int snapshot_size = 0;
 
 void VID_AllocSharedPalette(unsigned char *palette)
 {
 	XColor c;
-	XColor q[256];
-	int i, j, best, cmapsz;
+	int i, j, best;
 	long dist, bestdist;
 	int dr, dg, db;
 
-	if (n_alloced)
+	if (!snapshot_size)
 	{
-		XFreeColors(x_disp, x_cmap, alloced_pixels, n_alloced, 0);
-		n_alloced = 0;
+		for (i=0 ; i<256 ; i++)
+		{
+			c.red = palette[i*3] * 257;
+			c.green = palette[i*3+1] * 257;
+			c.blue = palette[i*3+2] * 257;
+			c.flags = DoRed|DoGreen|DoBlue;
+			if (XAllocColor(x_disp, x_cmap, &c))
+				alloced_pixels[n_alloced++] = c.pixel;
+		}
+		snapshot_size = x_visinfo->colormap_size;
+		if (snapshot_size > 256)
+			snapshot_size = 256;
+		for (i=0 ; i<snapshot_size ; i++)
+			cmap_snapshot[i].pixel = i;
+		XQueryColors(x_disp, x_cmap, cmap_snapshot, snapshot_size);
+		Sys_Printf("VID: shared colormap: %d of 256 quake colors allocated\n",
+			n_alloced);
 	}
-
-	cmapsz = x_visinfo->colormap_size;
-	if (cmapsz > 256)
-		cmapsz = 256;
-	for (i=0 ; i<cmapsz ; i++)
-		q[i].pixel = i;
-	XQueryColors(x_disp, x_cmap, q, cmapsz);
 
 	for (i=0 ; i<256 ; i++)
 	{
-		c.red = palette[i*3] * 257;
-		c.green = palette[i*3+1] * 257;
-		c.blue = palette[i*3+2] * 257;
-		c.flags = DoRed|DoGreen|DoBlue;
-		if (XAllocColor(x_disp, x_cmap, &c))
+		best = 0;
+		bestdist = 0x7fffffff;
+		for (j=0 ; j<snapshot_size ; j++)
 		{
-			st2d_8to8table[i] = (unsigned char) c.pixel;
-			alloced_pixels[n_alloced++] = c.pixel;
-		}
-		else
-		{
-			best = 0;
-			bestdist = 0x7fffffff;
-			for (j=0 ; j<cmapsz ; j++)
+			dr = (int)(cmap_snapshot[j].red >> 8) - palette[i*3];
+			dg = (int)(cmap_snapshot[j].green >> 8) - palette[i*3+1];
+			db = (int)(cmap_snapshot[j].blue >> 8) - palette[i*3+2];
+			dist = dr*dr + dg*dg + db*db;
+			if (dist < bestdist)
 			{
-				dr = (int)(q[j].red >> 8) - palette[i*3];
-				dg = (int)(q[j].green >> 8) - palette[i*3+1];
-				db = (int)(q[j].blue >> 8) - palette[i*3+2];
-				dist = dr*dr + dg*dg + db*db;
-				if (dist < bestdist)
-				{
-					bestdist = dist;
-					best = j;
-				}
+				bestdist = dist;
+				best = j;
 			}
-			st2d_8to8table[i] = (unsigned char) best;
 		}
+		st2d_8to8table[i] = (unsigned char) best;
 	}
 }
 
