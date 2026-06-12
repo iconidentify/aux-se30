@@ -1,12 +1,23 @@
 #!/bin/sh
 SHELL=/bin/bash; export SHELL
-PATH=/bin:/usr/bin:/usr/bin/X11:/usr/ucb:/usr/local/bin:/etc; export PATH
-# X resources (white-on-black xterms, etc.)
+PATH=/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/ucb:/etc; export PATH
+# X resources (synthwave xterms, etc.)
 [ -r /.Xdefaults ] && xrdb -merge /.Xdefaults
-# Desktop background: A/UX branding (black logo on white)
-xsetroot -bitmap /usr/local/auxbrand.xbm -fg black -bg white
+# Right-shift fix: XmacII's keymap has no Shift_R; the right shift is keycode 131.
+xmodmap -e 'keycode 131 = Shift_R' -e 'add Shift = Shift_R'
+# Arrow-key fix: QEMU's ADB keyboard puts Down/Up where XmacII's keymap
+# expects Control_R/Meta_R (keycodes 69/70). Left/Right (67/68) are fine.
+xmodmap -e 'keycode 69 = Down' -e 'keycode 70 = Up'
+# Desktop background: solid synthwave colour first (instant, never crashes),
+# then the full C89 SUMMER image (64-colour, verified safe).  The solid stays
+# as a fallback if c89bg ever can't set the image.
+xsetroot -solid "#1a0a2a"
+/usr/local/bin/c89bg
 # Disable XmacII's built-in screen saver; use our bouncing-logo one (2 min idle)
 xset s off
+# Silence the bell: the q800's sound chip under QEMU -audio none can crash the
+# emulator when rung, so turn the X bell off entirely (apps use a visual bell).
+xset b off
 /usr/local/bin/auxsaver 120 &
 # fvwm is the session leader: closing terminals is safe; "Quit" ends the session.
 exec fvwm

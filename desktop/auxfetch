@@ -1,35 +1,60 @@
 #!/bin/sh
 # auxfetch - a tiny neofetch-style system summary for A/UX.
-# Bourne sh only (no bashisms); tuned for the SE/30 / A/UX 3.1.1.
+# Bourne sh only (no bashisms).  Auto-detects SE/30 vs Quadra and renders in
+# colour on a colour screen (depth > 1), mono otherwise.
+#   auxfetch         - auto
+#   auxfetch -m      - force mono
+#   auxfetch -c      - force colour
+
+PATH=$PATH:/usr/bin:/usr/bin/X11; export PATH
+
+# ---- machine detection (CPU tells SE/30 from Quadra) -----------------------
+CPU=`uname -m 2>/dev/null`; [ -z "$CPU" ] && CPU=mc68030
+case "$CPU" in
+  *040*) MODEL="Macintosh Quadra 800"; MHZ=33; ARCH=mc68040 ;;
+  *030*) MODEL="Macintosh SE/30";      MHZ=16; ARCH=mc68030 ;;
+  *)     MODEL="Macintosh";            MHZ="?"; ARCH="$CPU" ;;
+esac
 
 # ---- gather info -----------------------------------------------------------
 HOST=`uname -n 2>/dev/null`;      [ -z "$HOST" ] && HOST=aux
 REL=`uname -r 2>/dev/null`;       [ -z "$REL" ] && REL="3.1.1"
-ARCH=`uname -m 2>/dev/null`;      [ -z "$ARCH" ] && ARCH="mc68030"
 USR=`id 2>/dev/null | sed 's/^uid=[0-9]*(\([^)]*\)).*/\1/'`
 [ -z "$USR" ] && USR=root
 SH=`basename "${SHELL:-/bin/sh}"`
+if [ "$SH" = "bash" ]; then
+  BV=`"$SHELL" -c 'echo $BASH_VERSION' 2>/dev/null | sed 's/(.*//'`
+  [ -n "$BV" ] && SH="bash $BV"
+fi
 TERMN="${TERM:-xterm}"
 
-# uptime: A/UX has no uptime(1); show boot time from who -b if present
 BOOT=`who -b 2>/dev/null | sed -n 's/.*boot *//p' | sed 's/^ *//'`
 [ -z "$BOOT" ] && BOOT="-"
 
-# window manager: look for a known one in the process list
+# window manager
 WM="none"
-if   /bin/ps -e 2>/dev/null | grep -i fvwm  >/dev/null 2>&1; then WM="fvwm 1.24r"
-elif /bin/ps -e 2>/dev/null | grep -i twm   >/dev/null 2>&1; then WM="twm"
+if   /bin/ps -e 2>/dev/null | grep fvwm  >/dev/null 2>&1; then WM="fvwm 1.24r"
+elif /bin/ps -e 2>/dev/null | grep twm   >/dev/null 2>&1; then WM="twm"
 fi
 
-# display geometry/depth from xdpyinfo if a server is reachable
-DISP="512x342, 1bpp (mono)"
+# screen depth straight from the running X server (xdpyinfo is unreliable here)
+DEPTH=`/bin/ps -ef 2>/dev/null | grep XmacII | grep -v grep | sed -n 's/.*-depth  *\([0-9][0-9]*\).*/\1/p' | head -1`
+[ -z "$DEPTH" ] && DEPTH=1
+
+# geometry: xwininfo if a display is reachable, else by model
+GEO=""
 if [ -n "$DISPLAY" ]; then
-  DD=`xdpyinfo 2>/dev/null | sed -n 's/^  dimensions: *\([0-9x]*\).*/\1/p' | head -1`
-  DP=`xdpyinfo 2>/dev/null | sed -n 's/^  depth of root window: *\([0-9]*\).*/\1/p' | head -1`
-  [ -n "$DD" ] && DISP="$DD, ${DP:-1}bpp"
+  GEO=`xwininfo -root 2>/dev/null | sed -n 's/.*-geometry  *\([0-9][0-9]*x[0-9][0-9]*\).*/\1/p' | head -1`
+  # live depth from the server beats any guess
+  XD=`xwininfo -root 2>/dev/null | sed -n 's/.*Depth: *\([0-9][0-9]*\).*/\1/p' | head -1`
+  [ -n "$XD" ] && DEPTH="$XD"
 fi
+if [ -z "$GEO" ]; then
+  case "$CPU" in *040*) GEO="1152x870" ;; *) GEO="512x342" ;; esac
+fi
+if [ "$DEPTH" = "1" ]; then DISP="$GEO, 1bpp (mono)"; else DISP="$GEO, ${DEPTH}bpp colour"; fi
 
-# free disk on / (A/UX df: "<blocks> blocks <inodes> i-nodes"), 512-byte blocks
+# free disk on / (A/UX df: "<blocks> blocks ..."), 512-byte blocks
 DFREE=`df / 2>/dev/null | sed -n 's/.* \([0-9][0-9]*\) blocks.*/\1/p' | head -1`
 if [ -n "$DFREE" ]; then
   DMB=`expr $DFREE / 2048 2>/dev/null`
@@ -37,6 +62,15 @@ if [ -n "$DFREE" ]; then
 else
   DISK="-"
 fi
+
+# ---- colour decision -------------------------------------------------------
+COLOR=0
+[ "$DEPTH" -gt 1 ] 2>/dev/null && COLOR=1
+case "$1" in
+  -m|--mono)            COLOR=0 ;;
+  -c|--color|--colour)  COLOR=1 ;;
+esac
+[ -n "$NO_COLOR" ] && COLOR=0
 
 # ---- the Apple logo --------------------------------------------------------
 cat > /tmp/auxfetch.logo$$ <<'LOGO'
@@ -64,22 +98,51 @@ cat > /tmp/auxfetch.info$$ <<INFO
 $USR@$HOST
 -----------------
 OS:       A/UX $REL (SVR2)
-Host:     Macintosh SE/30
+Host:     $MODEL
 Kernel:   $REL
-Arch:     $ARCH @ 16 MHz
+Arch:     $ARCH @ $MHZ MHz
 Booted:   $BOOT
 Shell:    $SH
 WM:       $WM
-Terminal: $TERMN (X11R6)
+Terminal: $TERMN (X11R6 pl11)
 Display:  $DISP
 Disk:     $DISK
 
 [ built from source on A/UX ]
 INFO
 
-# ---- merge side by side (no printf(1) on A/UX; use awk + paste) -------------
+# ---- render logo column (rainbow Apple when colour) ------------------------
+awk -v color=$COLOR '
+BEGIN {
+  b[0]="\033[32m"; b[1]="\033[33m"; b[2]="\033[31m";
+  b[3]="\033[35m"; b[4]="\033[34m"; b[5]="\033[36m";
+}
+{
+  if (color==1) {
+    band=int((NR-1)/3); if (band>5) band=5;
+    printf "  %s%-32s\033[0m\n", b[band], $0;
+  } else {
+    printf "  %-32s\n", $0;
+  }
+}' /tmp/auxfetch.logo$$ > /tmp/auxfetch.plogo$$
+
+# ---- render info column (cyan labels when colour) --------------------------
+awk -v color=$COLOR '
+{
+  if (color==1) {
+    c=index($0,":");
+    if (c>0) {
+      printf "\033[1;36m%s\033[0m%s\n", substr($0,1,c), substr($0,c+1);
+    } else if (NR==1) {
+      printf "\033[1;35m%s\033[0m\n", $0;
+    } else {
+      print $0;
+    }
+  } else print $0;
+}' /tmp/auxfetch.info$$ > /tmp/auxfetch.pinfo$$
+
+# ---- merge side by side ----------------------------------------------------
 echo ""
-awk '{ printf "  %-32s\n", $0 }' /tmp/auxfetch.logo$$ > /tmp/auxfetch.plogo$$
-paste -d' ' /tmp/auxfetch.plogo$$ /tmp/auxfetch.info$$
+paste -d' ' /tmp/auxfetch.plogo$$ /tmp/auxfetch.pinfo$$
 echo ""
-rm -f /tmp/auxfetch.logo$$ /tmp/auxfetch.info$$ /tmp/auxfetch.plogo$$
+rm -f /tmp/auxfetch.logo$$ /tmp/auxfetch.info$$ /tmp/auxfetch.plogo$$ /tmp/auxfetch.pinfo$$

@@ -1,0 +1,7 @@
+#!/bin/sh
+# fvwm launcher for fsv - the Jurassic Park 3D file manager (TreeV mode)
+# Shared colormap: Mesa walks down to whatever color cube fits, dithering
+# covers the rest. (MESA_PRIVATE_CMAP fixed SimCity coexistence but made
+# the whole screen strobe on every pointer crossing - worse.)
+cd /usr/local/fsv
+exec ./fsv --treev ${1:-/usr/local}

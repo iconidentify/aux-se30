@@ -1,0 +1,30 @@
+# /.gtkrc - synthwave theme v2 for GTK+ 1.2 on the A/UX desktop.
+# Engines need dlopen (A/UX has none); rc styles do everything we need.
+# Font: lucidatypewriter bold - the SGI console family. fsn energy.
+style "synthwave"
+{
+  font = "-b&h-lucidatypewriter-bold-r-normal-sans-12-120-75-75-m-70-iso8859-1"
+
+  # panels and buttons: mid violet, readable relief
+  bg[NORMAL]      = { 0.24, 0.13, 0.42 }
+  bg[PRELIGHT]    = { 0.36, 0.20, 0.58 }
+  bg[ACTIVE]      = { 0.16, 0.09, 0.30 }
+  bg[INSENSITIVE] = { 0.20, 0.11, 0.36 }
+
+  # text on panels: near-white lavender
+  fg[NORMAL]      = { 0.95, 0.92, 1.00 }
+  fg[PRELIGHT]    = { 1.00, 1.00, 1.00 }
+  fg[ACTIVE]      = { 0.95, 0.92, 1.00 }
+  fg[INSENSITIVE] = { 0.55, 0.48, 0.72 }
+
+  # list/tree interiors: near-black purple with cyan text
+  base[NORMAL]    = { 0.07, 0.04, 0.14 }
+  text[NORMAL]    = { 0.48, 0.94, 1.00 }
+
+  # selection: hot magenta, white text
+  bg[SELECTED]    = { 0.88, 0.12, 0.49 }
+  fg[SELECTED]    = { 1.00, 1.00, 1.00 }
+  base[SELECTED]  = { 0.88, 0.12, 0.49 }
+  text[SELECTED]  = { 1.00, 1.00, 1.00 }
+}
+widget_class "*" style "synthwave"

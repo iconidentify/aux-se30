@@ -1,0 +1,8 @@
+# /.auxtoprc - auxtop theme (C89 SUMMER synthwave)
+# colors: black red green yellow blue magenta cyan white
+title=magenta
+text=white
+accent=cyan
+bar=magenta
+header=magenta
+status=cyan

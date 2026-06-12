@@ -1,15 +1,17 @@
-# .fvwmrc - A/UX SE/30, fvwm 1.24r, 1-bit mono, single-button mouse.
+# .fvwmrc - A/UX AUXVM, fvwm 1.24r, depth 8 colour, single-button mouse.
+# NOTE: fvwm 1.x requires every Popup to be DEFINED BEFORE it is referenced.
+# So all sub-popups come first and "Main" is defined last.
 
-# ---- colours (monochrome) ----
-StdForeColor     Black
-StdBackColor     White
-HiForeColor      White
-HiBackColor      Black
-StickyForeColor  Black
-StickyBackColor  White
-MenuForeColor    Black
-MenuBackColor    White
-MenuStippleColor Black
+# ---- colours (C89 SUMMER synthwave; named colours - fvwm treats # as comment) ----
+StdForeColor     cyan
+StdBackColor     MidnightBlue
+HiForeColor      white
+HiBackColor      magenta
+StickyForeColor  black
+StickyBackColor  cyan
+MenuForeColor    cyan
+MenuBackColor    MidnightBlue
+MenuStippleColor magenta
 
 # ---- fonts ----
 Font       fixed
@@ -22,9 +24,10 @@ ClickTime 350
 OpaqueMove 100
 RandomPlacement
 SmartPlacement
+ClickToFocus
 
 # ---- decoration ----
-Style "*"       BorderWidth 5, HandleWidth 5, Color Black/White
+Style "*"       BorderWidth 5, HandleWidth 5, Color cyan/MidnightBlue
 Style "*"       Icon unknown1.xbm
 Style "Fvwm*"   NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0
 Style "*clock"  NoTitle, NoHandles, Sticky, WindowListSkip
@@ -53,42 +56,9 @@ Function "Icon-Move-Restore"
   Iconify    "Click"
 EndFunction
 
-# ---- menus ----
-Popup "Main"
-  Title      "A/UX"
-  Exec       "Terminal"      exec xterm -fn 6x10 -fg white -bg black -sb -e /bin/bash -l &
-  Popup      "Appearance"    Appearance
-  Nop        ""
-  Exec       "Clock"         exec oclock &
-  Exec       "Calculator"    exec xcalc &
-  Nop        ""
-  WindowList "Window List"
-  Popup      "Window Ops"    Window-Ops
-  Nop        ""
-  Popup      "Quit / Log out" Quit-Verify
-EndPopup
-
-Popup "Appearance"
-  Title      "Appearance"
-  Popup      "Desktop..."    Desktop-Menu
-  Popup      "New Terminal..." Terminal-Menu
-EndPopup
-
-Popup "Desktop-Menu"
-  Title      "Desktop"
-  Exec       "A/UX on white" exec xsetroot -bitmap /usr/local/auxbrand.xbm -fg black -bg white &
-  Exec       "A/UX on black" exec xsetroot -bitmap /usr/local/auxbrand.xbm -fg white -bg black &
-  Nop        ""
-  Exec       "Solid white"   exec xsetroot -solid white &
-  Exec       "Solid black"   exec xsetroot -solid black &
-  Exec       "Gray weave"    exec xsetroot -gray &
-EndPopup
-
-Popup "Terminal-Menu"
-  Title      "New Terminal"
-  Exec       "White on black" exec xterm -fn 6x10 -fg white -bg black -sb -e /bin/bash -l &
-  Exec       "Black on white" exec xterm -fn 6x10 -fg black -bg white -sb -e /bin/bash -l &
-EndPopup
+# ====================================================================
+# SUB-POPUPS FIRST (must be defined before "Main" references them)
+# ====================================================================
 
 Popup "Window-Ops"
   Title      "Window"
@@ -103,12 +73,71 @@ Popup "Window-Ops"
   Delete     "Close"
 EndPopup
 
+Popup "Desktop-Menu"
+  Title      "Desktop"
+  Exec       "C89 SUMMER"    exec /usr/local/bin/c89bg &
+  Nop        ""
+  Exec       "Solid purple"  exec xsetroot -solid "#190a2e" &
+  Exec       "Solid magenta" exec xsetroot -solid "#2a0a4a" &
+  Exec       "Solid black"   exec xsetroot -solid black &
+  Exec       "BG: C89 Summer" exec /usr/local/bin/c89bg &
+  Exec       "BG: Beach Apple" exec /usr/local/bin/bgroot /usr/local/bgs/bg1.xpm &
+  Exec       "BG: SE30 Ad"     exec /usr/local/bin/bgroot /usr/local/bgs/bg2.xpm &
+  Exec       "BG: Apple Mark"  exec /usr/local/bin/bgroot /usr/local/bgs/bg3.xpm &
+  Exec       "BG: Chrome AUX"  exec /usr/local/bin/bgroot /usr/local/bgs/bg4.xpm &
+  Exec       "BG: Billboard"   exec /usr/local/bin/bgroot /usr/local/bgs/bg5.xpm &
+  Exec       "BG: Night Drive" exec /usr/local/bin/bgroot /usr/local/bgs/bg6.xpm &
+  Exec       "BG: Apple Planet" exec /usr/local/bin/bgroot /usr/local/bgs/bg7.xpm &
+  Exec       "BG: Neon City"   exec /usr/local/bin/bgroot /usr/local/bgs/bg8.xpm &
+  Exec       "BG: CRT Den"     exec /usr/local/bin/bgroot /usr/local/bgs/bg9.xpm &
+  Exec       "BG: Chrome AUX2" exec /usr/local/bin/bgroot /usr/local/bgs/bg10.xpm &
+EndPopup
+
+Popup "Terminal-Menu"
+  Title      "New Terminal"
+  Exec       "Synthwave"      exec /usr/local/bin/xterm -fn 7x13 -fg rgb:7a/f0/ff -bg rgb:19/0a/2e -cr rgb:ff/2a/8a -e /bin/bash -l &
+  Exec       "Amber (80s)"    exec /usr/local/bin/xterm -fn 7x13 -fg rgb:ff/b0/00 -bg rgb:1a/0e/00 -cr rgb:ff/d0/00 -e /bin/bash -l &
+  Exec       "Green phosphor" exec /usr/local/bin/xterm -fn 7x13 -fg rgb:33/ff/66 -bg rgb:00/1a/08 -cr rgb:66/ff/99 -e /bin/bash -l &
+  Exec       "Mono"           exec /usr/local/bin/xterm -fn 7x13 -fg white -bg black -e /bin/bash -l &
+EndPopup
+
+Popup "Appearance"
+  Title      "Appearance"
+  Popup      "Desktop..."      Desktop-Menu
+  Popup      "New Terminal..." Terminal-Menu
+EndPopup
+
 Popup "Quit-Verify"
   Title      "Log out of A/UX?"
   Nop        "Cancel"
   Nop        ""
   Restart    "Restart fvwm" fvwm
   Quit       "Yes, log out"
+EndPopup
+
+# ====================================================================
+# MAIN MENU LAST
+# ====================================================================
+
+Popup "Main"
+  Title      "A/UX"
+  Exec       "Terminal"      exec /usr/local/bin/xterm -fn 7x13 -fg rgb:7a/f0/ff -bg rgb:19/0a/2e -cr rgb:ff/2a/8a -e /bin/bash -l &
+  Popup      "Appearance"    Appearance
+  Nop        ""
+  Exec       "SimCity"       exec /usr/local/bin/simcity &
+  Exec       "Quake"         exec /usr/local/bin/quake-x11 &
+  Exec       "fsv 3D"        exec /usr/local/bin/fsv3d &
+  Exec       "auxtop"        exec /usr/local/bin/auxtop-x &
+  Nop        ""
+  Exec       "Clock"         exec oclock &
+  Exec       "Calculator"    exec xcalc &
+  Exec       "Load Meter"    exec xload -nolabel -fg cyan -bg MidnightBlue -hl magenta -update 2 -geometry 140x90 &
+  Nop        ""
+  WindowList "Window List"
+  Popup      "Window Ops"    Window-Ops
+  Nop        ""
+  Restart    "Restart fvwm"  fvwm
+  Popup      "Quit / Log out" Quit-Verify
 EndPopup
 
 # ---- mouse (single button = Button 1) ----
