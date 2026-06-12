@@ -181,8 +181,6 @@ Mouse 1 FS N Function "Resize-or-Raise"
 Mouse 1 W M Function "Move-or-Raise"
 Mouse 1 W C RaiseLower
 Mouse 1 I N Function "Icon-Move-Restore"
-# meta (command) + drag moves any window, title bar or not
-Mouse 1 W M Move
 
 # ---- keys ----
 Key F1 A N Popup "Main"
