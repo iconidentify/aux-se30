@@ -1,0 +1,36 @@
+.TH DIALC 1 "June 2026" "A/UX Workstation" "Local Commands"
+.SH NAME
+dialc \- Dialtone P3/FDO command line client (AOL 3.x revival)
+.SH SYNOPSIS
+.B dialc
+[\fB\-v\fP] [\fB\-p\fP] [\fIuser\fP [\fIpass\fP [\fIhost\fP [\fIport\fP]]]]
+.SH DESCRIPTION
+.B dialc
+is a terminal client for the Dialtone AOL 3.x revival network
+(production dialtone.live:5190).  It speaks the real P3 wire protocol
+- CRC-16/IBM framing, sliding window sequencing, token dispatch - with
+binary FDO payloads compiled byte-for-byte like a vintage client.
+Chat, instant messages, and the news reader run in a multi-window
+ncurses interface.  Without credentials an AOL-style sign-on form
+appears; any name and password signs on as an ephemeral guest.
+.SH OPTIONS
+.TP
+.B \-p
+plain line mode (pipes and scripted tests; auto-joins the room)
+.TP
+.B \-v
+verbose P3 wire tracing with frame hexdumps (implies \-p)
+.SH COMMANDS
+/chat joins the Dialtone Lobby; /im <name> <text> sends an instant
+message; /news goes to the news window and /news <1-5> reads a story;
+/w <n> switches windows; /help and /about open their screens; /leave
+exits the room; /quit signs off.
+.SH KEYS
+esc-<n> jumps to window n (esc-0 menu, esc-1 news); ctrl-n and ctrl-p
+cycle windows; arrows pick headlines or scroll; pgup/pgdn page;
+ctrl-a, ctrl-e, ctrl-u, ctrl-w edit the input line; ctrl-l repaints.
+.SH SOURCE
+github.com/iconidentify/dialc (MIT).  The A/UX build recipe and compat
+notes live in the se30 repository.
+.SH SEE ALSO
+rxvt(1), auxtop(1), DOCUMENT(7) in /DOCUMENT

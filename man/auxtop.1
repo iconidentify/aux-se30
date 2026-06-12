@@ -1,0 +1,37 @@
+.TH AUXTOP 1 "June 2026" "A/UX Workstation" "Local Commands"
+.SH NAME
+auxtop \- themed real-time process monitor for A/UX
+.SH SYNOPSIS
+.B auxtop
+.SH DESCRIPTION
+.B auxtop
+is an htop-inspired ncurses process monitor for A/UX 3.1.1.  It reads
+the kernel through
+.I /dev/kmem
+via the machine-dependent module from top 3.5 and renders live CPU,
+memory, and swap meters above a process table sorted by size.
+.PP
+The A/UX cpustate order is
+.IR idle,user,kernel,wait,nice ;
+auxtop looks the idle slot up by name rather than position.
+.SH KEYS
+.TP
+.B q
+quit
+.TP
+.B space
+refresh now
+.TP
+.B i
+toggle idle processes
+.SH THEMES
+Colors come from
+.I /.auxtoprc
+or the file named by
+.BR AUXTOP_THEME .
+Keys title, text, accent, bar, header, and status take the eight ANSI
+color names.  The default is the C89 SUMMER synthwave palette.
+.SH FILES
+/.auxtoprc, /dev/kmem
+.SH SEE ALSO
+dialc(1), auxfont(1), DOCUMENT(7) in /DOCUMENT

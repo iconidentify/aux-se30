@@ -97,3 +97,21 @@ XCalc*ti.button3.background: #ff2a8a
 XCalc*ti.button4.background: #ff2a8a
 XCalc*ti.button5.background: #ff2a8a
 XCalc*font:                 profont12
+
+! xman: the manual browser, profont + synthwave
+Xman*background:            #2a1440
+Xman*foreground:            #e0d8ff
+Xman*manualFontNormal:      profont15
+Xman*manualFontBold:        profont15
+Xman*manualFontItalic:      profont15
+Xman*directoryFontNormal:   profont12
+Xman*bothShown:             false
+Xman*topBox:                true
+Xman*Command.background:    #3d2160
+Xman*Command.foreground:    #ffffff
+Xman*MenuButton.background: #3d2160
+Xman*MenuButton.foreground: #ffffff
+Xman*Label.background:      #190a2e
+Xman*Label.foreground:      #40f0ff
+Xman*Scrollbar.background:  #190a2e
+Xman*Scrollbar.foreground:  #ff2a8a

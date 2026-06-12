@@ -1,0 +1,23 @@
+.TH AUXAGENT 1 "June 2026" "A/UX Workstation" "Local Commands"
+.SH NAME
+auxagent \- remote exec and file transfer agent (AAP over HTTP/1.0)
+.SH DESCRIPTION
+.B auxagent
+listens on port 8377 (boot-persistent via /etc/inittab) and speaks
+AAP, a thin convention set over HTTP/1.0: every operation is a single
+length-delimited request, connections are one-shot, and file
+transfers carry a CRC-32.  It exists because telnet/ftp automation on
+A/UX is unreliable (no framing, flush lag, leaky sessions).
+.SH PROTOCOL
+GET /ping returns the agent version.  POST /exec runs the body as a
+shell command and returns merged output with X-Exit-Code.  GET and
+PUT /file/<abspath> transfer files with X-Aap-Sum (CRC-32) integrity.
+.SH CLIENT
+Driven from the controlling Mac with auxctl: ping, exec, get, put,
+and admin (which wraps /usr/local/auxadmin for workstation settings).
+.SH CAVEAT
+Commands run with stdin closed; programs that open the X display can
+land the connection on fd 0 and break themselves - redirect stdin
+from /dev/null (the xrdb merge in auxfont does exactly this).
+.SH SEE ALSO
+auxfont(1), DOCUMENT(7) in /DOCUMENT

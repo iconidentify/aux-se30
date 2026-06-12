@@ -49,6 +49,9 @@ Style "*imCity*"   Icon city.xbm
 Style "*imcity*"   Icon city.xbm
 Style "*uake*"     Icon quake.xbm
 Style "fsv*"       Icon fsv.xbm
+Style "xman"       Icon manual.xbm
+Style "Xman"       Icon manual.xbm
+Style "Manual*"    Icon manual.xbm
 Style "Fvwm*"   NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0
 Style "oclock"  NoTitle, NoHandles, Sticky, WindowListSkip
 Style "XClock"  Sticky, Handles
@@ -133,6 +136,7 @@ Popup "Accessories"
   Exec       "Clock"      exec /usr/bin/X11/xclock -digital -update 1 -fg "#ff2a8a" -bg "#190a2e" -fn profont22 &
   Exec       "Calculator" exec /usr/bin/X11/xcalc &
   Exec       "Eyes"       exec /usr/bin/X11/xeyes -fg "#ff2a8a" -bg "#190a2e" -outline "#40f0ff" -center "#2a1440" &
+  Exec       "Manual"     exec /usr/bin/X11/xman &
 EndPopup
 
 Popup "Quit-Verify"
