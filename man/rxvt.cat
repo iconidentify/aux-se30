@@ -1,0 +1,874 @@
+1(RXVT)                             X Tools                            1(RXVT)
+
+NNAAMMEE
+       rxvt (ouR XVT) - a VT102 emulator for the X window system
+
+SSYYNNOOPPSSIISS
+       rrxxvvtt [options] [-e command [ args ]]
+
+DDEESSCCRRIIPPTTIIOONN
+       rrxxvvtt, version 22..66..44, is a colour vt102 terminal emulator intended as an
+       _x_t_e_r_m(1) replacement for users who do not require features such as
+       Tektronix 4014 emulation and toolkit-style configurability.  As a
+       result, rrxxvvtt uses much less swap space -- a significant advantage on a
+       machine serving many X sessions.
+
+OOPPTTIIOONNSS
+       The rrxxvvtt options (mostly a subset of _x_t_e_r_m's) are listed below.  In
+       keeping with the smaller-is-better philosophy, options may be
+       eliminated or default values chosen at compile-time, so options and
+       defaults listed may not accurately reflect the version installed on
+       your system.  `rxvt -h' gives a list of major compile-time options on
+       the usage line.  Option descriptions may be prefixed with which compile
+       option each is dependent upon.  e.g. `Compile _X_I_M:' requires _X_I_M on the
+       usage line.  Note: `rxvt -help' gives a list of all options compiled
+       into your version.
+
+       Note that rrxxvvtt permits the resource name to be used as a long-option
+       (--/++ option) so the potential command-line options are far greater
+       than those listed.  For example: `rxvt --loginShell --color1 Orange'.
+
+       --hheellpp, ----hheellpp
+              Print out a message describing available options.
+
+       --ddiissppllaayy _d_i_s_p_l_a_y_n_a_m_e
+              Attempt to open a window on the named X display (--dd still
+              respected).  In the absence of this option, the display
+              specified by the DDIISSPPLLAAYY environment variable is used.
+
+       --ggeeoommeettrryy _g_e_o_m
+              Window geometry (--gg still respected); resource ggeeoommeettrryy.
+
+       --rrvv|++rrvv
+              Turn on/off simulated reverse video; resource rreevveerrsseeVViiddeeoo.
+
+       --iipp|++iipp
+              Turn on/off inheriting parent window's pixmap.  Alternative form
+              is --ttrr; resource iinnhheerriittPPiixxmmaapp.
+
+       --bbgg _c_o_l_o_u_r
+              Window background colour; resource bbaacckkggrroouunndd.
+
+       --ffgg _c_o_l_o_u_r
+              Window foreground colour; resource ffoorreeggrroouunndd.
+
+       --ppiixxmmaapp:: _f_i_l_e_[_;_g_e_o_m_]
+              Compile _X_P_M: Specify XPM file for the background and also
+              optionally specify its scaling with a geometry string.  Note you
+              may need to add quotes to avoid special shell interpretation of
+              the `;' in the command-line; resource bbaacckkggrroouunnddPPiixxmmaapp.
+
+       --ccrr _c_o_l_o_u_r
+              The cursor colour; resource ccuurrssoorrCCoolloorr.
+
+       --pprr _c_o_l_o_u_r
+              The mouse pointer colour; resource ppooiinntteerrCCoolloorr.
+
+       --bbdd _c_o_l_o_u_r
+              The colour of the border between the xterm scrollbar and the
+              text; resource bboorrddeerrCCoolloorr.
+
+       --ffnn _f_o_n_t_n_a_m_e
+              Main normal text font; resource ffoonntt.
+
+       --ffbb _f_o_n_t_n_a_m_e
+              Main bold text font; resource bboollddFFoonntt.
+
+       --ffmm _f_o_n_t_n_a_m_e
+              Main multicharacter font; resource mmffoonntt.
+
+       --kkmm _m_o_d_e
+              Multiple-character font-set encoding mode; eeuuccjj: EUC Japanese
+              encoding.  ssjjiiss: Shift JIS encoding; resource
+              mmuullttiicchhaarr__eennccooddiinngg.
+
+       --ggrrkk _m_o_d_e
+              Greek keyboard translation; iissoo: ISO-8859 mapping.  iibbmm: IBM-437
+              mapping; resource ggrreeeekk__kkeeyybbooaarrdd.
+
+       --nnaammee _n_a_m_e
+              Specify the application name under which resources are to be
+              obtained, rather than the default executable file name.  Name
+              should not contain `.' or `*' characters.  Also sets the icon
+              and title name.
+
+       --llss|++llss
+              Start as a login-shell/sub-shell; resource llooggiinnSShheellll.
+
+       --uutt|++uutt
+              Compile _u_t_m_p: Inhibit/enable writing a utmp entry; resource
+              uuttmmppIInnhhiibbiitt.
+
+       --vvbb|++vvbb
+              Turn on/off visual bell on receipt of a bell character; resource
+              vviissuuaallBBeellll.
+
+       --ssbb|++ssbb
+              Turn on/off scrollbar; resource ssccrroollllBBaarr.
+
+       --ssii|++ssii
+              Turn on/off scroll-to-bottom on TTY output inhibit; resource
+              ssccrroollllTTttyyOOuuttppuutt has opposite effect.
+
+       --sskk|++sskk
+              Turn on/off scroll-to-bottom on keypress; resource
+              ssccrroollllTTttyyKKeeyypprreessss.
+
+       --ssrr|++ssrr
+              Put scrollbar on right/left; resource ssccrroollllBBaarr__rriigghhtt.
+
+       --sstt|++sstt
+              Display normal (non XTerm/NeXT) scrollbar without/with a trough;
+              resource ssccrroollllBBaarr__ffllooaattiinngg.
+
+       --iiccoonniicc
+              Start iconified, if the window manager supports that option.
+              Alternative form is --iicc.
+
+       --ssll _n_u_m_b_e_r
+              Save _n_u_m_b_e_r lines in the scrollback buffer; resource ssaavveeLLiinneess.
+
+       --ttnn _t_e_r_m_n_a_m_e
+              This option specifies the name of the terminal type to be set in
+              the TTEERRMM environment variable. This terminal type must exist in
+              the _t_e_r_m_c_a_p_(_5_) database and should have _l_i_# and _c_o_# entries;
+              resource tteerrmmNNaammee.
+
+       --ee _c_o_m_m_a_n_d _[_a_r_g_u_m_e_n_t_s_]
+              Run the command with its command-line arguments in the rrxxvvtt
+              window; also sets the window title and icon name to be the
+              basename of the program being executed if neither _-_t_i_t_l_e (_-_T)
+              nor _-_n are given on the command line.  If this option is used,
+              it must be the last on the command-line.  If there is no --ee
+              option then the default is to run the program specified by the
+              SSHHEELLLL environment variable or, failing that, _s_h_(_1_).
+
+       --ttiittllee _t_e_x_t
+              Window title (--TT still respected); the default title is the
+              basename of the program specified after the --ee option, if any,
+              otherwise the application name; resource ttiittllee.
+
+       --nn _t_e_x_t
+              Icon name; the default name is the basename of the program
+              specified after the --ee option, if any, otherwise the application
+              name; resource iiccoonnNNaammee.
+
+       --CC     Capture system console messages.
+
+       --pptt _s_t_y_l_e
+              Compile _X_I_M: input style for input method; OOvveerrTThheeSSppoott,
+              OOffffTThheeSSppoott, RRoooott; resource pprreeeeddiittTTyyppee.
+
+       --iimm _t_e_x_t
+              Compile _X_I_M: input method name.  resource iinnppuuttMMeetthhoodd.
+
+       --mmoodd _m_o_d_i_f_i_e_r
+              Override detection of Meta modifier with specified key: aalltt,
+              mmeettaa, hhyyppeerr, ssuuppeerr, mmoodd11, mmoodd22, mmoodd33, mmoodd44, mmoodd55; resource
+              _m_o_d_i_f_i_e_r.
+
+       --xxrrmm _r_e_s_o_u_r_c_e_s_t_r_i_n_g
+              No effect on rxvt.  Simply passes through an argument to be made
+              available in the instance's argument list.  Appears in
+              _W_M___C_O_M_M_A_N_D in some window managers.
+
+RREESSOOUURRCCEESS ((aavvaaiillaabbllee aallssoo aass lloonngg--ooppttiioonnss))
+       Note: `rxvt --help' gives a list of all resources (long options)
+       compiled into your version.  If compiled with internal Xresources
+       support (i.e. rrxxvvtt --hh lists ..XXddeeffaauullttss) then rrxxvvtt accepts application
+       defaults set in XAPPLOADDIR/Rxvt (compile-time defined: usually
+       //uussrr//lliibb//XX1111//aapppp--ddeeffaauullttss//RRxxvvtt) and resources set in ~~//..XXddeeffaauullttss, or
+       ~~//..XXrreessoouurrcceess if ~~//..XXddeeffaauullttss does not exist.  Note that when reading X
+       resources, rrxxvvtt recognizes two class names: XXTTeerrmm and RRxxvvtt.  The class
+       name XXTTeerrmm allows resources common to both rrxxvvtt and _x_t_e_r_m to be easily
+       configured, while the class name RRxxvvtt allows resources unique to rrxxvvtt,
+       notably colours and key-handling, to be shared between different rrxxvvtt
+       configurations.  If no resources are specified, suitable defaults will
+       be used.  Command-line arguments can be used to override resource
+       settings.  The following resources are allowed:
+
+       ggeeoommeettrryy:: _g_e_o_m
+              Create the window with the specified X window geometry [default
+              80x24]; option --ggeeoommeettrryy.
+
+       bbaacckkggrroouunndd:: _c_o_l_o_u_r
+              Use the specified colour as the window's background colour
+              [default White]; option --bbgg.
+
+       ffoorreeggrroouunndd:: _c_o_l_o_u_r
+              Use the specified colour as the window's foreground colour
+              [default Black]; option --ffgg.
+
+       ccoolloorr_n:: _c_o_l_o_u_r
+              Use the specified colour for the colour value _n, where 0-7
+              corresponds to low-intensity (normal) colours and 8-15
+              corresponds to high-intensity (bold = bright foreground, blink =
+              bright background) colours.  The canonical names are as follows:
+              0=black, 1=red, 2=green, 3=yellow, 4=blue, 5=magenta, 6=cyan,
+              7=white, but the actual colour names used are listed in the
+              CCOOLLOORRSS AANNDD GGRRAAPPHHIICCSS section.
+
+       ccoolloorrBBDD:: _c_o_l_o_u_r
+              Use the specified colour to display bold characters when the
+              foreground colour is the default.
+
+       ccoolloorrUULL:: _c_o_l_o_u_r
+              Use the specified colour to display underlined characters when
+              the foreground colour is the default.
+
+       ccuurrssoorrCCoolloorr:: _c_o_l_o_u_r
+              Use the specified colour for the cursor.  The default is to use
+              the foreground colour; option --ccrr.
+
+       ccuurrssoorrCCoolloorr22:: _c_o_l_o_u_r
+              Use the specified colour for the colour of the cursor text.  For
+              this to take effect, ccuurrssoorrCCoolloorr must also be specified.  The
+              default is to use the background colour.
+
+       rreevveerrsseeVViiddeeoo:: _b_o_o_l_e_a_n
+              TTrruuee: simulate reverse video by foreground and background
+              colours; option --rrvv, FFaallssee: regular screen colours [default];
+              option ++rrvv.  See note in CCOOLLOORRSS AANNDD GGRRAAPPHHIICCSS section.
+
+       iinnhheerriittPPiixxmmaapp:: _b_o_o_l_e_a_n
+              TTrruuee: make the background inherit the parent windows' pixmap,
+              giving artificial transparency.  FFaallssee: do not inherit the
+              parent windows' pixmap.
+
+       ssccrroollllCCoolloorr:: _c_o_l_o_u_r
+              Use the specified colour for the scrollbar [default #B2B2B2].
+
+       ttrroouugghhCCoolloorr:: _c_o_l_o_u_r
+              Use the specified colour for the scrollbar's trough area
+              [default #969696].  Only relevant for normal (non XTerm/NeXT)
+              scrollbar.
+
+       bbaacckkggrroouunnddPPiixxmmaapp:: _f_i_l_e_[_;_g_e_o_m_]
+              Use the specified XPM file (note the `.xpm' extension is
+              optional) for the background and also optionally specify its
+              scaling with a geometry string WWxxHH++XX++YY, in which ""WW"" // ""HH""
+              specify the horizontal/vertical scale (percent) and ""XX"" // ""YY""
+              locate the image centre (percent).  A scale of 0 displays the
+              image with tiling.  A scale of 1 displays the image without any
+              scaling.  A scale of 2 to 9 specifies an integer number of
+              images in that direction.  No image will be magnified beyond 10
+              times its original size.  The maximum permitted scale is 1000.
+              [default 0x0+50+50]
+
+       mmeennuu:: _f_i_l_e_[_;_t_a_g_]
+              Read in the specified menu file (note the `.menu' extension is
+              optional) and also optionally specify a starting tag to find.
+              See the reference documentation for details on the syntax for
+              the menuBar.
+
+       ppaatthh:: _p_a_t_h
+              Specify the colon-delimited search path for finding files (XPM
+              and menus), in addition to the paths specified by the RRXXVVTTPPAATTHH
+              and PPAATTHH environment variables.
+
+       ffoonntt:: _f_o_n_t_n_a_m_e
+              Select the main text font used [default 7x14]; option --ffnn.
+
+       ffoonntt_n:: _f_o_n_t_n_a_m_e
+              Specify the alternative font _n.  The default font values:
+
+ \!.3rmk "\$1"
+\!.nr 3crow 0
+\!.3rvpt "\$1"
+ffoonntt:                                                                                                                                                                                                                                                                7x14
+
+\!.3rvpt "\$1"
+
+\!.nr 3brule 1
+
+
+\!.3rvpt "\$1"
+
+\!.3rmk "\$1"
+\!.nr 3crow 1
+\!.3rvpt "\$1"
+ffoonntt11:                                                                                                                                                                                                                                                                6x10
+
+\!.3rvpt "\$1"
+
+\!.nr 3brule 1
+
+
+\!.3rvpt "\$1"
+
+\!.3rmk "\$1"
+\!.nr 3crow 2
+\!.3rvpt "\$1"
+ffoonntt22:                                                                                                                                                                                                                                                                6x13
+
+\!.3rvpt "\$1"
+
+\!.nr 3brule 1
+
+
+\!.3rvpt "\$1"
+
+\!.3rmk "\$1"
+\!.nr 3crow 3
+\!.3rvpt "\$1"
+ffoonntt33:                                                                                                                                                                                                                                                                8x13
+
+\!.3rvpt "\$1"
+
+\!.nr 3brule 1
+
+
+\!.3rvpt "\$1"
+
+\!.3rmk "\$1"
+\!.nr 3crow 4
+\!.3rvpt "\$1"
+ffoonntt44:                                                                                                                                                                                                                                                                9x15
+
+\!.3rvpt "\$1"
+
+\!.nr 3brule 1
+
+
+\!.3rvpt "\$1"
+
+
+
+\!.3rvpt "\$1"
+
+       bboollddFFoonntt:: _f_o_n_t_n_a_m_e
+              Specify the name of the bold font to use if ccoolloorrBBDD has not been
+              specified and it is not possible to map the default foreground colour
+              to colour 8-15 [default NONE].  This font must be the same height and
+              width as the normal font;
+              option --ffbb.
+
+       mmffoonntt:: _f_o_n_t_n_a_m_e
+              Select the main multiple-character text font used [default k14];
+              option --ffkk.
+
+       mmffoonntt_n:: _f_o_n_t_n_a_m_e
+              Specify the alternative multiple-character font _n.  If compiled
+              for multiple-character fonts, the Roman and multiple-character font
+              sizes should match.
+
+       mmuullttiicchhaarr__eennccooddiinngg:: _m_o_d_e
+              Set the encoding mode to be used when multicharacter encoding is
+              received;
+              eeuuccjj: EUC Japanese encoding [default for Kanji].
+              ssjjiiss: Shift JIS encoding.
+              bbiigg55: BIG5 encoding.
+              ggbb: GB encoding;
+              option --kkmm.
+
+       ggrreeeekk__kkeeyybbooaarrdd:: _m_o_d_e
+              Set the Greek keyboard translation mode to be used;
+              iissoo: ISO-8859 mapping (elot-928) [default].
+              iibbmm: IBM-437 mapping (DOS codepage 737);
+              option --ggrrkk.
+              Use MMooddee__sswwiittcchh to toggle keyboard input.  For more details,
+              see the distributed file RREEAADDMMEE..ggrreeeekk.
+
+       sseelleeccttssttyyllee:: _t_e_x_t
+              Set mouse selection style to oolldd which is 2.20, oollddwwoorrdd which
+              is xterm style with 2.20 old word selection, or anything else which
+              gives xterm style selection.
+
+       ttiittllee:: _t_e_x_t
+              Set window title string, the default title is the command-line
+              specified after the --ee option, if any, otherwise the application
+              name;
+              option --ttiittllee.
+
+       iiccoonnNNaammee:: _t_e_x_t
+              Set the name used to label the window's icon or displayed in an icon
+              manager window, it also sets the window's title unless it is
+              explicitly set;
+              option --nn.
+
+       mmaappAAlleerrtt:: _b_o_o_l_e_a_n
+              TTrruuee: de-iconify (map) on receipt of a bell character.
+              FFaallssee: no de-iconify (map) on receipt of a bell character
+              [default].
+
+       vviissuuaallBBeellll:: _b_o_o_l_e_a_n
+              TTrruuee: use visual bell on receipt of a bell character;
+              option --vvbb.
+              FFaallssee: no visual bell [default];
+              option ++vvbb.
+
+       llooggiinnSShheellll:: _b_o_o_l_e_a_n
+              TTrruuee: start as a login shell by prepending a `-' to aarrggvv[[00]]
+              of the shell;
+              option --llss.
+              FFaallssee: start as a normal sub-shell [default];
+              option ++llss.
+
+       uuttmmppIInnhhiibbiitt:: _b_o_o_l_e_a_n
+              TTrruuee: inhibit writing record into the system log file uuttmmpp;
+              option --uutt.
+              FFaallssee: write record into the system log file uuttmmpp [default];
+              option ++uutt.
+
+       pprriinntt--ppiippee:: _s_t_r_i_n_g
+              Specify a command pipe for vt100 printer [default _l_p_r_(_1_)].  Use
+              PPrriinntt to initiate a screen dump to the printer and CCttrrll--PPrriinntt
+              or SShhiifftt--PPrriinntt to include the scrollback as well.
+
+       ssccrroollllBBaarr:: _b_o_o_l_e_a_n
+              TTrruuee: enable the scrollbar [default];
+              option --ssbb.
+              FFaallssee: disable the scrollbar;
+              option ++ssbb.
+
+       ssccrroollllBBaarr__rriigghhtt:: _b_o_o_l_e_a_n
+              TTrruuee: place the scrollbar on the right of the window;
+              option --ssrr.
+              FFaallssee: place the scrollbar on the left of the window;
+              option ++ssrr.
+
+       ssccrroollllBBaarr__ffllooaattiinngg:: _b_o_o_l_e_a_n
+              TTrruuee: display an rxvt scrollbar without a trough;
+              option --sstt.
+              FFaallssee: display an rxvt scrollbar with a trough;
+              option ++sstt.
+
+       ssccrroollllTTttyyOOuuttppuutt:: _b_o_o_l_e_a_n
+              TTrruuee: scroll to bottom when tty receives output;
+              option(+si).
+              FFaallssee: do not scroll to bottom when tty receives output;
+              option(-si).
+
+       ssccrroollllTTttyyKKeeyypprreessss:: _b_o_o_l_e_a_n
+              TTrruuee: scroll to bottom when a non-special key is pressed.
+              Special keys are those which are intercepted by rxvt for special
+              handling and are not passed onto the shell;
+              option(-sk).
+              FFaallssee: do not scroll to bottom when a non-special key is pressed;
+              option(+sk).
+
+       ssmmaallllffoonntt__kkeeyy:: _k_e_y_s_y_m
+              If enabled, use AAlltt--_k_e_y_s_y_m to toggle to a smaller font
+              [default AAlltt--<<]
+
+       bbiiggffoonntt__kkeeyy:: _k_e_y_s_y_m
+              If enabled, use AAlltt--_k_e_y_s_y_m to toggle to a bigger font
+              [default AAlltt-->>]
+
+       ssaavveeLLiinneess:: _n_u_m_b_e_r
+              Save _n_u_m_b_e_r lines in the scrollback buffer [default 64];
+              option --ssll.
+
+       tteerrmmNNaammee:: _t_e_r_m_n_a_m_e
+              Specifies the terminal type name to be set in the TTEERRMM
+              environment variable;
+              option --ttnn.
+
+       mmeettaa88:: _b_o_o_l_e_a_n
+              TTrruuee: handle Meta (Alt) + keypress to set the 8th bit.
+              FFaallssee: handle Meta (Alt) + keypress as an escape prefix [default].
+
+       bbaacckkssppaacceekkeeyy:: _s_t_r_i_n_g
+              The string to send when the backspace key is pressed.  If set to
+              DDEECC or unset it will send DDeelleettee (code 127) or, if shifted,
+              BBaacckkssppaaccee (code 8) - which can be reversed with the appropriate
+              DEC private mode escape sequence.
+
+       ddeelleetteekkeeyy:: _s_t_r_i_n_g
+              The string to send when the delete key (not the keypad delete key) is
+              pressed.  If unset it will send the sequence traditionally associated
+              with the EExxeeccuuttee key.
+
+       ccuuttcchhaarrss:: _s_t_r_i_n_g
+              The characters used as delimiters for double-click word selection.
+              The built-in default:
+              BBAACCKKSSLLAASSHH ``""''&&(())**,,;;<<==>>??@@[[]]{{||}}
+
+       pprreeeeddiittTTyyppee:: _s_t_y_l_e
+              OOvveerrTThheeSSppoott, OOffffTThheeSSppoott, RRoooott;
+              option --pptt.
+
+       iinnppuuttMMeetthhoodd:: _n_a_m_e
+              _n_a_m_e of inputMethod to use;
+              option --iimm.
+
+       mmooddiiffiieerr:: _m_o_d_i_f_i_e_r
+              Set the key to be interpreted as the Meta key to:
+              aalltt, mmeettaa, hhyyppeerr, ssuuppeerr, mmoodd11, mmoodd22, mmoodd33,
+              mmoodd44, mmoodd55;
+              option --mmoodd.
+
+       kkeeyyssyymm.._s_y_m: _s_t_r_i_n_g
+              Associate _s_t_r_i_n_g with keysym _s_y_m (00xxFFFF0000 -- 00xxFFFFFFFF).  It
+              may contain escape values (\a: bell, \b: backspace, \e, \E: escape,
+              \n: newline, \r: return, \t: tab, \000: octal number) or control
+              characters (^?: delete, ^@: null, ^A ...) and may enclosed with
+              double quotes so that it can start or end with whitespace.  The
+              intervening resource name kkeeyyssyymm.. cannot be omitted.  This
+              resource is only available when compiled with KEYSYM_RESOURCE.
+
+TTHHEE SSCCRROOLLLLBBAARR
+       Lines of text that scroll off the top of the rrxxvvtt window (resource:
+       ssaavveeLLiinneess) and can be scrolled back using the scrollbar or by
+       keystrokes.  The normal rrxxvvtt scrollbar has arrows and its behaviour is
+       fairly intuitive.  The xxtteerrmm--ssccrroollllbbaarr is without arrows and its
+       behaviour mimics that of _x_t_e_r_m
+
+       Scroll down with BBuuttttoonn11 (xxtteerrmm--ssccrroollllbbaarr) or SShhiifftt--NNeexxtt.  Scroll up
+       with BBuuttttoonn33 (xxtteerrmm--ssccrroollllbbaarr) or SShhiifftt--PPrriioorr.  Continuous scroll with
+       BBuuttttoonn22.
+
+MMOOUUSSEE RREEPPOORRTTIINNGG
+       To temporarily override mouse reporting, for either the scrollbar or
+       the normal text selection/insertion, hold either the Shift or the Meta
+       (Alt) key while performing the desired mouse action.
+
+       If mouse reporting mode is active, the normal scrollbar actions are
+       disabled -- on the assumption that we are using a fullscreen
+       application.  Instead, pressing Button1 and Button3 sends EESSCC[[66~~ (Next)
+       and EESSCC[[55~~ (Prior), respectively.  Similarly, clicking on the up and
+       down arrows sends EESSCC[[AA (Up) and EESSCC[[BB (Down), respectively.
+
+TTEEXXTT SSEELLEECCTTIIOONN AANNDD IINNSSEERRTTIIOONN
+       The behaviour of text selection and insertion mechanism is similar to
+       _x_t_e_r_m(1).
+
+       SSeelleeccttiioonn:
+              Left click at the beginning of the region, drag to the end of
+              the region and release; Right click to extend the marked region;
+              Left double-click to select a word; Left triple-click to select
+              the entire line.
+
+       IInnsseerrttiioonn:
+              Pressing and releasing the Middle mouse button (or SShhiifftt--IInnsseerrtt)
+              in an rrxxvvtt window causes the current text selection to be
+              inserted as if it had been typed on the keyboard.
+
+CCHHAANNGGIINNGG FFOONNTTSS
+       You can change fonts on-the-fly, which is to say cycle through the
+       default font and others of various sizes, by using SShhiifftt--KKPP__AAdddd and
+       SShhiifftt--KKPP__SSuubbttrraacctt.  Or, alternatively (if enabled) with AAlltt-->> and
+       AAlltt--<<, where the actual key can be selected using resources
+       ssmmaallllffoonntt__kkeeyy/bbiiggffoonntt__kkeeyy.
+
+LLOOGGIINN SSTTAAMMPP
+       rrxxvvtt tries to write an entry into the _u_t_m_p(5) file so that it can be
+       seen via the _w_h_o_(_1_) command, and can accept messages.  To allow this
+       feature, rrxxvvtt must be installed setuid root on some systems.
+
+CCOOLLOORRSS AANNDD GGRRAAPPHHIICCSS
+       If graphics support was enabled at compile-time, rrxxvvtt can be queried
+       with ANSI escape sequences and can address individual pixels instead of
+       text characters.  Note the graphics support is still considered beta
+       code.
+
+       In addition to the default foreground and background colours, rrxxvvtt can
+       display up to 16 colours (8 ANSI colours plus high-intensity bold/blink
+       versions of the same).  Here is a list of the colours with their
+       rrggbb..ttxxtt names.
+
+\!.3rmk "\$1"
+\!.nr 3crow 0
+\!.3rvpt "\$1"
+ccoolloorr00                                                                                                                                                                                                                                                                (black) = Black
+
+\!.3rvpt "\$1"
+
+\!.nr 3brule 1
+
+
+\!.3rvpt "\$1"
+
+\!.3rmk "\$1"
+\!.nr 3crow 1
+\!.3rvpt "\$1"
+ccoolloorr11                                                                                                                                                                                                                                                                (red)   = Red3
+
+\!.3rvpt "\$1"
+
+\!.nr 3brule 1
+
+
+\!.3rvpt "\$1"
+
+\!.3rmk "\$1"
+\!.nr 3crow 2
+\!.3rvpt "\$1"
+ccoolloorr22                                                                                                                                                                                                                                                                (green) = Green3
+
+\!.3rvpt "\$1"
+
+\!.nr 3brule 1
+
+
+\!.3rvpt "\$1"
+
+\!.3rmk "\$1"
+\!.nr 3crow 3
+\!.3rvpt "\$1"
+ccoolloorr33                                                                                                                                                                                                                                                                (yellow)= Yellow3
+
+\!.3rvpt "\$1"
+
+\!.nr 3brule 1
+
+
+\!.3rvpt "\$1"
+
+\!.3rmk "\$1"
+\!.nr 3crow 4
+\!.3rvpt "\$1"
+ccoolloorr44                                                                                                                                                                                                                                                                (blue)  = Blue3
+
+\!.3rvpt "\$1"
+
+\!.nr 3brule 1
+
+
+\!.3rvpt "\$1"
+
+\!.3rmk "\$1"
+\!.nr 3crow 5
+\!.3rvpt "\$1"
+ccoolloorr55                                                                                                                                                                                                                                                                (magenta= Magenta3
+
+\!.3rvpt "\$1"
+
+\!.nr 3brule 1
+
+
+\!.3rvpt "\$1"
+
+\!.3rmk "\$1"
+\!.nr 3crow 6
+\!.3rvpt "\$1"
+ccoolloorr66                                                                                                                                                                                                                                                                (cyan)  = Cyan3
+
+\!.3rvpt "\$1"
+
+\!.nr 3brule 1
+
+
+\!.3rvpt "\$1"
+
+\!.3rmk "\$1"
+\!.nr 3crow 7
+\!.3rvpt "\$1"
+ccoolloorr77                                                                                                                                                                                                                                                                (white) = AntiqueWhite
+
+\!.3rvpt "\$1"
+
+\!.nr 3brule 1
+
+
+\!.3rvpt "\$1"
+
+\!.3rmk "\$1"
+\!.nr 3crow 8
+\!.3rvpt "\$1"
+ccoolloorr88                                                                                                                                                                                                                                                                (bright =lGrey25
+
+\!.3rvpt "\$1"
+
+\!.nr 3brule 1
+
+
+\!.3rvpt "\$1"
+
+\!.3rmk "\$1"
+\!.nr 3crow 9
+\!.3rvpt "\$1"
+ccoolloorr99                                                                                                                                                                                                                                                                (bright =eRed
+
+\!.3rvpt "\$1"
+
+\!.nr 3brule 1
+
+
+\!.3rvpt "\$1"
+
+\!.3rmk "\$1"
+\!.nr 3crow 10
+\!.3rvpt "\$1"
+ccoolloorr1100                                                                                                                                                                                                                                                                (bright =rGreen
+
+\!.3rvpt "\$1"
+
+\!.nr 3brule 1
+
+
+\!.3rvpt "\$1"
+
+\!.3rmk "\$1"
+\!.nr 3crow 11
+\!.3rvpt "\$1"
+ccoolloorr1111                                                                                                                                                                                                                                                                (bright =eYellow
+
+\!.3rvpt "\$1"
+
+\!.nr 3brule 1
+
+
+\!.3rvpt "\$1"
+
+\!.3rmk "\$1"
+\!.nr 3crow 12
+\!.3rvpt "\$1"
+ccoolloorr1122                                                                                                                                                                                                                                                                (bright =lBlue
+
+\!.3rvpt "\$1"
+
+\!.nr 3brule 1
+
+
+\!.3rvpt "\$1"
+
+\!.3rmk "\$1"
+\!.nr 3crow 13
+\!.3rvpt "\$1"
+ccoolloorr1133                                                                                                                                                                                                                                                                (bright =aMagenta
+
+\!.3rvpt "\$1"
+
+\!.nr 3brule 1
+
+
+\!.3rvpt "\$1"
+
+\!.3rmk "\$1"
+\!.nr 3crow 14
+\!.3rvpt "\$1"
+ccoolloorr1144                                                                                                                                                                                                                                                                (bright =yCyan
+
+\!.3rvpt "\$1"
+
+\!.nr 3brule 1
+
+
+\!.3rvpt "\$1"
+
+\!.3rmk "\$1"
+\!.nr 3crow 15
+\!.3rvpt "\$1"
+ccoolloorr1155                                                                                                                                                                                                                                                                (bright =hWhite
+
+\!.3rvpt "\$1"
+
+\!.nr 3brule 1
+
+
+\!.3rvpt "\$1"
+
+\!.3rmk "\$1"
+\!.nr 3crow 16
+\!.3rvpt "\$1"
+ffoorreeggrroouunndd                                                                                                                                                                                                                                                                = Black
+
+\!.3rvpt "\$1"
+
+\!.nr 3brule 1
+
+
+\!.3rvpt "\$1"
+
+\!.3rmk "\$1"
+\!.nr 3crow 17
+\!.3rvpt "\$1"
+bbaacckkggrroouunndd                                                                                                                                                                                                                                                                = White
+
+\!.3rvpt "\$1"
+
+\!.nr 3brule 1
+
+
+\!.3rvpt "\$1"
+
+
+
+\!.3rvpt "\$1"
+
+       It is also possible to specify the colour values of ffoorreeggrroouunndd,
+       bbaacckkggrroouunndd, ccuurrssoorrCCoolloorr, ccuurrssoorrCCoolloorr22, ccoolloorrBBDD, ccoolloorrUULL
+       as a number 0-15, as a convenient shorthand to reference the colour name of
+       color0-color15.
+
+       Note that --rrvv (""rreevveerrsseeVViiddeeoo:: TTrruuee"") simulates reverse video by
+       always swapping the foreground/background colours.  This is in contrast to
+       _x_t_e_r_m(1) where the colours are only swapped if they have not otherwise been
+       specified.
+       For example,
+
+       rrxxvvtt --ffgg BBllaacckk --bbgg WWhhiittee --rrvv
+              would yield White on Black, while on _x_t_e_r_m(1) it would yield
+              Black on White.
+
+EENNVVIIRROONNMMEENNTT
+       rrxxvvtt sets the environment variables TTEERRMM, CCOOLLOORRTTEERRMM and CCOOLLOORRFFGGBBGG.  The
+       environment variable WWIINNDDOOWWIIDD is set to the X window id number of the
+       rrxxvvtt window and it also uses and sets the environment variable DDIISSPPLLAAYY
+       to specify which display terminal to use.  rrxxvvtt uses the environment
+       variables RRXXVVTTPPAATTHH and PPAATTHH to find XPM files.
+
+FFIILLEESS
+       //eettcc//uuttmmpp
+              System file for login records.
+
+       //uussrr//lliibb//XX1111//rrggbb..ttxxtt
+              Color names.
+
+SSEEEE AALLSSOO
+       _x_t_e_r_m(1), _s_h(1), _r_e_s_i_z_e(1), _X(1), _p_t_y(4), _t_t_y(4), _u_t_m_p(5)
+
+       See rxvtRef.html rxvtRef.txt for detailed information on recognized
+       escape sequences and menuBar syntax, etc.
+
+BBUUGGSS
+       Check the BUGS file for an up-to-date list.
+
+       Cursor change support is not yet implemented.
+
+       Click-and-drag doesn't work with X11 mouse report overriding.
+
+       Graphics support is fairly crude.
+
+FFTTPP LLOOCCAATTIIOONN
+       rxvt-2.6.4.tar.gz can be found at the following ftp sites
+       ftp://ftp.rxvt.org/pub/rxvt
+
+CCUURRRREENNTT PPRROOJJEECCTT CCOOOORRDDIINNAATTOORR
+       Project Coordinator
+              Geoff Wing <gcw@rxvt.org>
+
+       Web page maintainter
+              Oezguer Kesim <oec@rxvt.org>
+              <http://www.rxvt.org/>
+
+       Mailing list
+              The Rxvt Workers <rxvt-workers@rxvt.org> mailing list has also
+              been established for rxvt development, to subscribe, email to
+              <rxvt-workers-subscribe@rxvt.org>.  There is also a mailing list
+              for announcements of new releases of rxvt. To subscribe, email
+              to <rxvt-announce-subscribe@rxvt.org>.
+
+AAUUTTHHOORRSS
+       John Bovey
+              University of Kent, 1992, wrote the original Xvt.
+
+       Rob Nation <nation@rocket.sanders.lockheed.com>
+              very heavily modified Xvt and came up with Rxvt
+
+       Angelo Haritsis <ah@doc.ic.ac.uk>
+              wrote the Greek Keyboard Input
+
+       mj olesen <olesen@me.QueensU.CA>
+              Wrote the menu system.
+              Project Coordinator (changes.txt 2.11 to 2.21)
+
+       Oezguer Kesim <kesim@math.fu-berlin.de>
+              Project Coordinator (changes.txt 2.21a to 2.4.5)
+
+       Geoff Wing <gcw@pobox.com>
+              Rewrote screen display and text selection routines.
+              Project Coordinator (changes.txt 2.4.6 - )
+
+X Version 11                   02 NOVEMBER 2001                        1(RXVT)

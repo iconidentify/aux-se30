@@ -1,0 +1,14 @@
+.TH AUXADMIN 1 "June 2026" "A/UX Workstation" "Local Commands"
+.SH NAME
+auxadmin \- workstation administration settings
+.SH SYNOPSIS
+.B auxadmin
+.BR list | get
+.IR key | set
+.I key value
+.SH DESCRIPTION
+Manages A/UX workstation settings such as autologin and session type.
+Usually driven remotely through the agent:
+.B auxctl admin HOST:PORT set autologin off
+.SH SEE ALSO
+auxagent(1), aux(7)

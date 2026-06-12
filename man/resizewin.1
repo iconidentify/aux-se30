@@ -1,0 +1,13 @@
+.TH RESIZEWIN 1 "June 2026" "A/UX Workstation" "Local Commands"
+.SH NAME
+resizewin \- resize an X window by name from a script
+.SH SYNOPSIS
+.B resizewin
+.I name width height
+.SH DESCRIPTION
+Finds the first window whose WM_NAME contains
+.I name
+and resizes it with XResizeWindow.  Built for poking applications
+during remote testing through the agent; lives in /usr/local/src.
+.SH SEE ALSO
+auxagent(1), aux(7)

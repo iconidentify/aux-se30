@@ -1,0 +1,23 @@
+.TH AUX 7 "June 2026" "A/UX Workstation" "Local Commands"
+.SH NAME
+aux \- overview of the local software on this A/UX workstation
+.SH DESCRIPTION
+This machine layers a modern terminal stack over stock A/UX 3.1.1:
+ncurses 5.7 (TERMINFO in /.bashrc), the rxvt 2.6.4 port (rxvt(1)),
+an X11R6 client library build, ProFont served as SNF, and the tools
+below.  The full plain-text manual lives in /DOCUMENT; sources, build
+notes, and recovery recipes are in the se30 repository on the
+controlling Mac.
+.SH COMMANDS
+auxtop(1) process monitor; dialc(1) Dialtone AOL client; auxfont(1)
+desktop font switcher; auxagent(1) remote exec/file agent with
+auxadmin(1); auxfetch(1), auxsaver(1), bgroot(1) desktop furniture;
+resizewin(1) X test helper; dialc-x(1) and auxtop-x(1) fvwm
+launchers.
+.SH CAVEATS
+Run sync(1) after writes you care about (crashes revert unsynced
+data).  Replace running binaries with mv-then-cp (text file busy).
+Keep the bell visual (audible can crash the emulator).  Curses
+programs must defeat tty output post-processing; see /DOCUMENT.
+.SH SEE ALSO
+DOCUMENT in /, the se30 repository
