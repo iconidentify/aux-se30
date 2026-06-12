@@ -30,6 +30,11 @@ SmartPlacement
 Style "*"       BorderWidth 5, HandleWidth 5, Color cyan/MidnightBlue
 IconPath /usr/local/icons:/usr/include/X11/bitmaps
 
+# icons live in a centered band along the top of the screen; the
+# Align Icons menu entry (ArrangeIcons, our fvwm builtin) re-snaps
+# every icon into this grid
+IconBox 126 4 1026 120
+
 # program icons - the consistent A/UX set (/usr/local/icons)
 Style "*"          Icon auxapp.xbm
 Style "Rxvt"       Icon terminal.xbm
@@ -163,6 +168,7 @@ Popup "Main"
   Popup      "Appearance"       Appearance
   WindowList "Window List"
   Popup      "Window Ops"       Window-Ops
+  ArrangeIcons "Align Icons"
   Nop        ""
   Popup      "Log Out"          Quit-Verify
 EndPopup
