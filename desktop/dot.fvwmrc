@@ -50,8 +50,9 @@ Style "*imcity*"   Icon city.xbm
 Style "*uake*"     Icon quake.xbm
 Style "fsv*"       Icon fsv.xbm
 Style "Fvwm*"   NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0
-Style "*clock"  NoTitle, NoHandles, Sticky, WindowListSkip
 Style "oclock"  NoTitle, NoHandles, Sticky, WindowListSkip
+Style "XClock"  Sticky, Handles
+Style "xclock"  Sticky, Handles
 
 # ---- start with just the desktop (no terminal) ----
 Function "InitFunction"
@@ -180,6 +181,8 @@ Mouse 1 FS N Function "Resize-or-Raise"
 Mouse 1 W M Function "Move-or-Raise"
 Mouse 1 W C RaiseLower
 Mouse 1 I N Function "Icon-Move-Restore"
+# meta (command) + drag moves any window, title bar or not
+Mouse 1 W M Move
 
 # ---- keys ----
 Key F1 A N Popup "Main"
