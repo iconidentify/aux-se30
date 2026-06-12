@@ -69,7 +69,7 @@ done
 
 ed_file /.gtkrc "s/^  font = .*/  font = \"$GTKESC\"/"
 
-DISPLAY=${DISPLAY:-:0} /usr/bin/X11/xrdb -merge /.Xdefaults 2>/dev/null
+DISPLAY=${DISPLAY:-:0} /usr/bin/X11/xrdb -nocpp -merge /.Xdefaults < /dev/null 2>/dev/null
 sync
 
 echo "font theme: $THEME  (terminals $TERMFN, chrome $CHROME, gtk $GTKFONT)"

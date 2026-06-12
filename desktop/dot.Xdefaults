@@ -64,3 +64,36 @@ Rxvt*color14: #9af8ff
 Rxvt*color15: #ffffff
 ! Visual bell is REQUIRED: the audible bell can crash QEMU (-audio none)
 Rxvt*visualBell:     true
+
+! ---- synthwave desk accessories ----
+! xclock: 80s LED - digital, hot pink on deep purple
+XClock*analog:       false
+XClock*update:       1
+XClock*font:         profont22
+XClock*foreground:   #ff2a8a
+XClock*background:   #190a2e
+XClock*borderColor:  #ff2a8a
+XClock*padding:      8
+
+! xeyes: watching the beach
+XEyes*foreground:    #ff2a8a
+XEyes*background:    #190a2e
+XEyes*outline:       #40f0ff
+XEyes*center:        #2a1440
+
+! xcalc: violet keys, cyan LCD
+XCalc*background:           #2a1440
+XCalc*foreground:           #e0d8ff
+XCalc*ti.background:        #190a2e
+XCalc*ti.bevel.background:  #0e0820
+XCalc*ti.bevel.screen.background: #190a2e
+XCalc*ti.bevel.screen*foreground: #40f0ff
+XCalc*ti.bevel.screen*background: #190a2e
+XCalc*Command.background:   #3d2160
+XCalc*Command.foreground:   #ffffff
+XCalc*ti.button1.background: #ff2a8a
+XCalc*ti.button2.background: #ff2a8a
+XCalc*ti.button3.background: #ff2a8a
+XCalc*ti.button4.background: #ff2a8a
+XCalc*ti.button5.background: #ff2a8a
+XCalc*font:                 profont12

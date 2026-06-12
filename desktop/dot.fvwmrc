@@ -28,7 +28,27 @@ SmartPlacement
 
 # ---- decoration ----
 Style "*"       BorderWidth 5, HandleWidth 5, Color cyan/MidnightBlue
-Style "*"       Icon unknown1.xbm
+IconPath /usr/local/icons:/usr/include/X11/bitmaps
+
+# program icons - the consistent A/UX set (/usr/local/icons)
+Style "*"          Icon auxapp.xbm
+Style "Rxvt"       Icon terminal.xbm
+Style "rxvt"       Icon terminal.xbm
+Style "XTerm"      Icon terminal.xbm
+Style "console"    Icon terminal.xbm
+Style "dialtone"   Icon dialtone.xbm
+Style "auxtop"     Icon auxtop.xbm
+Style "xclock"     Icon clock.xbm
+Style "XClock"     Icon clock.xbm
+Style "xeyes"      Icon eyes.xbm
+Style "XEyes"      Icon eyes.xbm
+Style "xcalc"      Icon calc.xbm
+Style "XCalc"      Icon calc.xbm
+Style "Calculator" Icon calc.xbm
+Style "*imCity*"   Icon city.xbm
+Style "*imcity*"   Icon city.xbm
+Style "*uake*"     Icon quake.xbm
+Style "fsv*"       Icon fsv.xbm
 Style "Fvwm*"   NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0
 Style "*clock"  NoTitle, NoHandles, Sticky, WindowListSkip
 Style "oclock"  NoTitle, NoHandles, Sticky, WindowListSkip
@@ -107,6 +127,13 @@ Popup "Appearance"
   Popup      "New Terminal..." Terminal-Menu
 EndPopup
 
+Popup "Accessories"
+  Title      "Desk Accessories"
+  Exec       "Clock"      exec /usr/bin/X11/xclock -digital -update 1 -fg "#ff2a8a" -bg "#190a2e" -fn profont22 &
+  Exec       "Calculator" exec /usr/bin/X11/xcalc &
+  Exec       "Eyes"       exec /usr/bin/X11/xeyes -fg "#ff2a8a" -bg "#190a2e" -outline "#40f0ff" -center "#2a1440" &
+EndPopup
+
 Popup "Quit-Verify"
   Title      "Log out of A/UX?"
   Nop        "Cancel"
@@ -128,6 +155,7 @@ Popup "Main"
   Exec       "Quake"         exec /usr/local/bin/quake-x11 &
   Exec       "fsv 3D"        exec /usr/local/bin/fsv3d &
   Exec       "auxtop"        exec /usr/local/bin/auxtop-x &
+  Popup      "Accessories"   Accessories
   Exec       "dialtone"      exec /usr/local/bin/dialc-x &
   Nop        ""
   Exec       "Clock"         exec oclock &
