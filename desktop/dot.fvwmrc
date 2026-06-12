@@ -159,7 +159,7 @@ Popup "Main"
   Popup      "Accessories"   Accessories
   Exec       "dialtone"      exec /usr/local/bin/dialc-x &
   Nop        ""
-  Exec       "Clock"         exec oclock &
+  Exec       "Clock"         exec /usr/bin/X11/xclock -digital -update 1 -fg "#ff2a8a" -bg "#190a2e" -fn profont22 &
   Exec       "Calculator"    exec xcalc &
   Exec       "Load Meter"    exec xload -nolabel -fg cyan -bg MidnightBlue -hl magenta -update 2 -geometry 140x90 &
   Nop        ""
