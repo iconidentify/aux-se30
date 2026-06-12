@@ -131,15 +131,6 @@ Popup "Appearance"
   Popup      "New Terminal..." Terminal-Menu
 EndPopup
 
-Popup "Accessories"
-  Title      "Desk Accessories"
-  Exec       "Clock"      exec /usr/bin/X11/xclock -digital -update 1 -fg "#ff2a8a" -bg "#190a2e" -fn profont22 &
-  Exec       "Calculator" exec /usr/bin/X11/xcalc &
-  Exec       "Eyes"       exec /usr/bin/X11/xeyes -fg "#ff2a8a" -bg "#190a2e" -outline "#40f0ff" -center "#2a1440" &
-  Exec       "Manual"     exec /usr/bin/X11/xman &
-  Exec       "neofetch"   exec /usr/local/bin/rxvt +sb -geometry 72x22 -fn profont15 -title neofetch -e /bin/sh -c "/usr/local/bin/auxfetch; echo; echo '  press return to close'; read x" &
-EndPopup
-
 Popup "Quit-Verify"
   Title      "Log out of A/UX?"
   Nop        "Cancel"
@@ -154,25 +145,26 @@ EndPopup
 
 Popup "Main"
   Title      "A/UX"
-  Exec       "Terminal"      exec /usr/local/bin/rxvt -fn profont15 -sl 512 -fg rgb:7a/f0/ff -bg rgb:19/0a/2e -cr rgb:ff/2a/8a -e /bin/bash -l &
-  Popup      "Appearance"    Appearance
+  Exec       "New Terminal"     exec /usr/local/bin/rxvt -fn profont15 -sl 512 -fg rgb:7a/f0/ff -bg rgb:19/0a/2e -cr rgb:ff/2a/8a -e /bin/bash -l &
+  Exec       "Dialtone"         exec /usr/local/bin/dialc-x &
+  Exec       "Process Monitor"  exec /usr/local/bin/auxtop-x &
+  Exec       "System Info"      exec /usr/local/bin/rxvt +sb -geometry 72x22 -fn profont15 -title neofetch -e /bin/sh -c "/usr/local/bin/auxfetch; echo; echo '  press return to close'; read x" &
   Nop        ""
-  Exec       "SimCity"       exec /usr/local/bin/simcity &
-  Exec       "Quake"         exec /usr/local/bin/quake-x11 &
-  Exec       "fsv 3D"        exec /usr/local/bin/fsv3d &
-  Exec       "auxtop"        exec /usr/local/bin/auxtop-x &
-  Popup      "Accessories"   Accessories
-  Exec       "dialtone"      exec /usr/local/bin/dialc-x &
+  Exec       "Clock"            exec /usr/bin/X11/xclock -digital -update 1 -fg "#ff2a8a" -bg "#190a2e" -fn profont22 &
+  Exec       "Calculator"       exec /usr/bin/X11/xcalc &
+  Exec       "Eyes"             exec /usr/bin/X11/xeyes -fg "#ff2a8a" -bg "#190a2e" -outline "#40f0ff" -center "#2a1440" &
+  Exec       "Load Meter"       exec /usr/bin/X11/xload -nolabel -fg "#40f0ff" -bg "#190a2e" -hl "#ff2a8a" -update 2 -geometry 140x90 &
+  Exec       "Manual"           exec /usr/bin/X11/xman &
   Nop        ""
-  Exec       "Clock"         exec /usr/bin/X11/xclock -digital -update 1 -fg "#ff2a8a" -bg "#190a2e" -fn profont22 &
-  Exec       "Calculator"    exec xcalc &
-  Exec       "Load Meter"    exec xload -nolabel -fg cyan -bg MidnightBlue -hl magenta -update 2 -geometry 140x90 &
+  Exec       "SimCity"          exec /usr/local/bin/simcity &
+  Exec       "Quake"            exec /usr/local/bin/quake-x11 &
+  Exec       "File Visualizer"  exec /usr/local/bin/fsv3d &
   Nop        ""
+  Popup      "Appearance"       Appearance
   WindowList "Window List"
-  Popup      "Window Ops"    Window-Ops
+  Popup      "Window Ops"       Window-Ops
   Nop        ""
-  Restart    "Restart fvwm"  fvwm
-  Popup      "Quit / Log out" Quit-Verify
+  Popup      "Log Out"          Quit-Verify
 EndPopup
 
 # ---- mouse (single button = Button 1) ----
