@@ -137,6 +137,7 @@ Popup "Accessories"
   Exec       "Calculator" exec /usr/bin/X11/xcalc &
   Exec       "Eyes"       exec /usr/bin/X11/xeyes -fg "#ff2a8a" -bg "#190a2e" -outline "#40f0ff" -center "#2a1440" &
   Exec       "Manual"     exec /usr/bin/X11/xman &
+  Exec       "neofetch"   exec /usr/local/bin/rxvt +sb -geometry 72x22 -fn profont15 -title neofetch -e /bin/sh -c "/usr/local/bin/auxfetch; echo; echo '  press return to close'; read x" &
 EndPopup
 
 Popup "Quit-Verify"

@@ -1,0 +1,7 @@
+# /.inputrc - readline keys for the A/UX terminals
+# delete key (rxvt/xterm send ESC [ 3 ~)
+"\e[3~": delete-char
+# home / end
+"\e[1~": beginning-of-line
+"\e[4~": end-of-line
+set bell-style visible
