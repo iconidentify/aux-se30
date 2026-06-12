@@ -1,0 +1,76 @@
+#!/bin/sh
+# auxfont - switch the A/UX desktop font theme everywhere at once:
+#   /.Xdefaults   Rxvt*/XTerm* font + boldFont (new terminals)
+#   /.fvwmrc      menu Font, WindowFont, and every -fn in Exec lines
+#   launchers     /usr/local/bin/auxtop-x, dialc-x (-fn)
+#   /.gtkrc       style font XLFD (gtk 1.2 apps)
+# Then merges resources and syncs the disk.  Restart fvwm (logout menu)
+# and open new terminals to see it.  usage: auxfont <theme>
+
+THEME="$1"
+
+case "$THEME" in
+profont)
+    TERMFN=profont15
+    BOLDFN=profont15
+    CHROME=profont12
+    CHROMEB=profont12
+    GTKFONT='-nil-profont-medium-r-normal--12-120-72-72-c-60-iso8859-1'
+    ;;
+profont-big)
+    TERMFN=profont17
+    BOLDFN=profont17
+    CHROME=profont15
+    CHROMEB=profont15
+    GTKFONT='-nil-profont-medium-r-normal--15-150-72-72-c-70-iso8859-1'
+    ;;
+profont-small)
+    TERMFN=profont12
+    BOLDFN=profont12
+    CHROME=profont11
+    CHROMEB=profont11
+    GTKFONT='-nil-profont-medium-r-normal--12-120-72-72-c-60-iso8859-1'
+    ;;
+fixed)
+    TERMFN=7x13
+    BOLDFN=7x13bold
+    CHROME=fixed
+    CHROMEB=6x13bold
+    GTKFONT='-b&h-lucidatypewriter-bold-r-normal-sans-12-120-75-75-m-70-iso8859-1'
+    ;;
+*)
+    echo "usage: auxfont profont|profont-big|profont-small|fixed"
+    exit 1
+    ;;
+esac
+
+GTKESC=`echo "$GTKFONT" | sed 's/&/\\\\\&/g'`
+
+ed_file() {
+    # ed_file <file> <sed-script>
+    sed "$2" "$1" > /tmp/af.$$ && cp /tmp/af.$$ "$1"
+    rm -f /tmp/af.$$
+}
+
+ed_file /.Xdefaults "
+s/^Rxvt\*font:.*/Rxvt*font:           $TERMFN/
+s/^Rxvt\*boldFont:.*/Rxvt*boldFont:       $BOLDFN/
+s/^XTerm\*font:.*/XTerm*font:          $TERMFN/
+s/^XTerm\*boldFont:.*/XTerm*boldFont:      $BOLDFN/"
+
+ed_file /.fvwmrc "
+s/^Font       .*/Font       $CHROME/
+s/^WindowFont .*/WindowFont $CHROMEB/
+s/-fn [^ ][^ ]*/-fn $TERMFN/g"
+
+for L in /usr/local/bin/auxtop-x /usr/local/bin/dialc-x; do
+    [ -f "$L" ] && ed_file "$L" "s/-fn [^ ][^ ]*/-fn $TERMFN/g"
+done
+
+ed_file /.gtkrc "s/^  font = .*/  font = \"$GTKESC\"/"
+
+DISPLAY=${DISPLAY:-:0} /usr/bin/X11/xrdb -merge /.Xdefaults 2>/dev/null
+sync
+
+echo "font theme: $THEME  (terminals $TERMFN, chrome $CHROME, gtk $GTKFONT)"
+echo "restart fvwm from the logout menu; new terminals pick it up now"

@@ -37,7 +37,7 @@ esac
 case $- in
 *i*)
   case "$TERM" in
-  xterm*)
+  xterm*|rxvt*)
     PROMPT_COMMAND='echo -ne "\033]0;auxvm: ${PWD}\007"'
     trap '[ "$BASH_COMMAND" != "$PROMPT_COMMAND" ] && echo -ne "\033]0;${BASH_COMMAND} - auxvm\007" 2>/dev/null' DEBUG
     ;;

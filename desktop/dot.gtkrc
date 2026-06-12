@@ -3,7 +3,7 @@
 # Font: lucidatypewriter bold - the SGI console family. fsn energy.
 style "synthwave"
 {
-  font = "-b&h-lucidatypewriter-bold-r-normal-sans-12-120-75-75-m-70-iso8859-1"
+  font = "-nil-profont-medium-r-normal--12-120-72-72-c-60-iso8859-1"
 
   # panels and buttons: mid violet, readable relief
   bg[NORMAL]      = { 0.24, 0.13, 0.42 }

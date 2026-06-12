@@ -18,6 +18,9 @@ xset s off
 # Silence the bell: the q800's sound chip under QEMU -audio none can crash the
 # emulator when rung, so turn the X bell off entirely (apps use a visual bell).
 xset b off
+# ProFont (SNF, /usr/lib/X11/fonts/profont) on the server font path
+xset fp+ /usr/lib/X11/fonts/profont 2>/dev/null
+xset fp rehash
 /usr/local/bin/auxsaver 120 &
 # fvwm is the session leader: closing terminals is safe; "Quit" ends the session.
 exec fvwm

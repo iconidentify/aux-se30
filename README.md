@@ -30,6 +30,27 @@ for the 1-bit mono display and a single-button mouse, a DVD-style bouncing-logo
 terminals, and a framed "A/UX" desktop background generated from the real Apple
 logo glyph. fvwm is the session anchor (no fragile console window).
 
+### [`rxvt/`](rxvt/) - rxvt 2.6.4 for A/UX
+A working rxvt (VT102 + 8-color ANSI) built with gcc 2.7.2.3 against the
+X11R6 client libraries, replacing the 1994 R6 xterm whose escape-sequence
+handling corrupts ncurses output. Installed on the guest as
+`/usr/local/bin/rxvt` (setuid for ptys), `TERM=rxvt`. Includes the A/UX
+source patches, the strdup/memmove shims, the split-libX11 link recipe,
+and a binary backup. All fvwm terminals now launch rxvt.
+
+### [`fonts/`](fonts/) - desktop fonts + the auxfont switcher
+ProFont (the classic Mac programmer's font) compiled to SNF for the
+R4-era XmacII server (sizes 10-29, aliases `profont10`..`profont29`),
+plus `auxfont` - a one-shot font theme switcher that rewrites every
+consumer at once (.Xdefaults Rxvt/XTerm resources, .fvwmrc menu/window
+fonts and terminal -fn flags, the auxtop-x/dialc-x launchers, .gtkrc).
+`auxfont profont|profont-big|profont-small|fixed`.
+
+### [`dialc/`](dialc/) - the Dialtone AOL client on A/UX
+Deployment notes, A/UX compat shims, and a binary backup for dialc
+(https://github.com/iconidentify/dialc) - the C89 terminal AOL client
+for the Dialtone revival network. On the fvwm Main menu as "dialtone".
+
 ### `dist/` - build artifacts
 Our compiled R6 shared libraries, import libraries, the split libX11 archive,
 the xterm binaries and objects, the GNU A/UX binutils used for linking, and

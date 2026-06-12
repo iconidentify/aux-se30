@@ -14,8 +14,8 @@ MenuBackColor    MidnightBlue
 MenuStippleColor magenta
 
 # ---- fonts ----
-Font       fixed
-WindowFont 6x13bold
+Font       profont12
+WindowFont profont12
 
 # ---- behaviour ----
 DeskTopSize 2x2
@@ -24,7 +24,7 @@ ClickTime 350
 OpaqueMove 100
 RandomPlacement
 SmartPlacement
-ClickToFocus
+# ClickToFocus  (disabled: flaky on XmacII; FocusFollowsMouse is reliable)
 
 # ---- decoration ----
 Style "*"       BorderWidth 5, HandleWidth 5, Color cyan/MidnightBlue
@@ -95,10 +95,10 @@ EndPopup
 
 Popup "Terminal-Menu"
   Title      "New Terminal"
-  Exec       "Synthwave"      exec /usr/local/bin/xterm -fn 7x13 -fg rgb:7a/f0/ff -bg rgb:19/0a/2e -cr rgb:ff/2a/8a -e /bin/bash -l &
-  Exec       "Amber (80s)"    exec /usr/local/bin/xterm -fn 7x13 -fg rgb:ff/b0/00 -bg rgb:1a/0e/00 -cr rgb:ff/d0/00 -e /bin/bash -l &
-  Exec       "Green phosphor" exec /usr/local/bin/xterm -fn 7x13 -fg rgb:33/ff/66 -bg rgb:00/1a/08 -cr rgb:66/ff/99 -e /bin/bash -l &
-  Exec       "Mono"           exec /usr/local/bin/xterm -fn 7x13 -fg white -bg black -e /bin/bash -l &
+  Exec       "Synthwave"      exec /usr/local/bin/rxvt -fn profont15 -sl 512 -fg rgb:7a/f0/ff -bg rgb:19/0a/2e -cr rgb:ff/2a/8a -e /bin/bash -l &
+  Exec       "Amber (80s)"    exec /usr/local/bin/rxvt -fn profont15 -sl 512 -fg rgb:ff/b0/00 -bg rgb:1a/0e/00 -cr rgb:ff/d0/00 -e /bin/bash -l &
+  Exec       "Green phosphor" exec /usr/local/bin/rxvt -fn profont15 -sl 512 -fg rgb:33/ff/66 -bg rgb:00/1a/08 -cr rgb:66/ff/99 -e /bin/bash -l &
+  Exec       "Mono"           exec /usr/local/bin/rxvt -fn profont15 -sl 512 -fg white -bg black -e /bin/bash -l &
 EndPopup
 
 Popup "Appearance"
@@ -121,13 +121,14 @@ EndPopup
 
 Popup "Main"
   Title      "A/UX"
-  Exec       "Terminal"      exec /usr/local/bin/xterm -fn 7x13 -fg rgb:7a/f0/ff -bg rgb:19/0a/2e -cr rgb:ff/2a/8a -e /bin/bash -l &
+  Exec       "Terminal"      exec /usr/local/bin/rxvt -fn profont15 -sl 512 -fg rgb:7a/f0/ff -bg rgb:19/0a/2e -cr rgb:ff/2a/8a -e /bin/bash -l &
   Popup      "Appearance"    Appearance
   Nop        ""
   Exec       "SimCity"       exec /usr/local/bin/simcity &
   Exec       "Quake"         exec /usr/local/bin/quake-x11 &
   Exec       "fsv 3D"        exec /usr/local/bin/fsv3d &
   Exec       "auxtop"        exec /usr/local/bin/auxtop-x &
+  Exec       "dialtone"      exec /usr/local/bin/dialc-x &
   Nop        ""
   Exec       "Clock"         exec oclock &
   Exec       "Calculator"    exec xcalc &

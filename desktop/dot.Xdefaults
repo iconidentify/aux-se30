@@ -1,8 +1,66 @@
-XTerm*foreground:    white
-XTerm*background:    black
-XTerm*cursorColor:   white
-XTerm*pointerColor:  white
-XTerm*font:          6x10
-XTerm*scrollBar:     true
-XTerm*saveLines:     512
+! ---- C89 SUMMER synthwave xterm theme (A/UX, 8-bit colour) ----
+XTerm*foreground:    #7af0ff
+XTerm*background:    #190a2e
+XTerm*cursorColor:   #ff2a8a
+XTerm*pointerColor:  #40f0ff
+XTerm*colorBD:       #ff7ad0
+XTerm*colorUL:       #ffd86a
+XTerm*font:          profont15
+XTerm*boldFont:      profont15
+XTerm*scrollBar:     false
+XTerm*saveLines:     1024
 XTerm*loginShell:    true
+XTerm*internalBorder: 8
+XTerm*borderColor:   #ff2a8a
+! ANSI 16-colour synthwave palette
+XTerm*color0:  #190a2e
+XTerm*color1:  #ff3a6a
+XTerm*color2:  #3affa0
+XTerm*color3:  #ffd86a
+XTerm*color4:  #6a7aff
+XTerm*color5:  #ff5ad0
+XTerm*color6:  #40f0ff
+XTerm*color7:  #e0d8ff
+XTerm*color8:  #5a3a7a
+XTerm*color9:  #ff6a9a
+XTerm*color10: #7affc0
+XTerm*color11: #fff0a0
+XTerm*color12: #9aa8ff
+XTerm*color13: #ff9ae0
+XTerm*color14: #9af8ff
+XTerm*color15: #ffffff
+! Visual bell instead of audible -- the q800 sound chip under QEMU -audio none
+! can crash the emulator when rung.  xset b off (in .x11start) also covers this.
+XTerm*visualBell:    true
+
+! ---- C89 SUMMER synthwave rxvt theme (mirrors the XTerm block) ----
+Rxvt*font:           profont15
+Rxvt*boldFont:       profont15
+Rxvt*foreground:     #7af0ff
+Rxvt*background:     #190a2e
+Rxvt*cursorColor:    #ff2a8a
+Rxvt*pointerColor:   #40f0ff
+Rxvt*colorBD:        #ff7ad0
+Rxvt*colorUL:        #ffd86a
+Rxvt*scrollBar:      false
+Rxvt*saveLines:      1024
+Rxvt*loginShell:     true
+! ANSI 16-colour synthwave palette
+Rxvt*color0:  #190a2e
+Rxvt*color1:  #ff3a6a
+Rxvt*color2:  #3affa0
+Rxvt*color3:  #ffd86a
+Rxvt*color4:  #6a7aff
+Rxvt*color5:  #ff5ad0
+Rxvt*color6:  #40f0ff
+Rxvt*color7:  #e0d8ff
+Rxvt*color8:  #5a3a7a
+Rxvt*color9:  #ff6a9a
+Rxvt*color10: #7affc0
+Rxvt*color11: #fff0a0
+Rxvt*color12: #9aa8ff
+Rxvt*color13: #ff9ae0
+Rxvt*color14: #9af8ff
+Rxvt*color15: #ffffff
+! Visual bell is REQUIRED: the audible bell can crash QEMU (-audio none)
+Rxvt*visualBell:     true
